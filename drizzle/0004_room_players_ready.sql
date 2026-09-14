@@ -1,0 +1,1 @@
+ALTER TABLE "room_players" ADD COLUMN "ready" boolean DEFAULT false NOT NULL;

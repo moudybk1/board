@@ -1,0 +1,164 @@
+import {
+  LUDO_CELLS,
+  LUDO_SIZE,
+  yardHex,
+  yardShade,
+  type LudoCell,
+} from "@/lib/game/ludo-board";
+import { pawnGlyph } from "@/lib/game/pawn-sprite";
+import { seatColor } from "@/lib/game/seats";
+import { cn } from "@/lib/utils";
+
+/**
+ * Pixel Ludo board: four coloured start yards with distinct seat glyphs, a
+ * cross-shaped track, and home lanes into the centre. Kept in DOM so pawn
+ * overlays can target cells by `data-row` / `data-col`.
+ */
+export function LudoBoard({
+  className,
+  overlay,
+}: {
+  className?: string;
+  overlay?: React.ReactNode;
+}) {
+  return (
+    <div
+      className={cn(
+        "relative grid aspect-square w-full gap-px bg-edge p-px",
+        className,
+      )}
+      style={{
+        gridTemplateColumns: `repeat(${LUDO_SIZE}, minmax(0, 1fr))`,
+        gridTemplateRows: `repeat(${LUDO_SIZE}, minmax(0, 1fr))`,
+      }}
+      role="img"
+      aria-label="Ludo board with four distinct seat yards"
+    >
+      {LUDO_CELLS.map((cell) => (
+        <LudoCellView key={`${cell.row}-${cell.col}`} cell={cell} />
+      ))}
+
+      {/* Yard identity badges · shape + colour, readable without pawns. */}
+      {([1, 2, 3, 4] as const).map((seat) => (
+        <YardBadge key={seat} seat={seat} />
+      ))}
+
+      {overlay}
+    </div>
+  );
+}
+
+function YardBadge({ seat }: { seat: number }) {
+  const color = seatColor(seat);
+  // Place badge in the inner corner of each yard (away from the track).
+  const placement: Record<number, string> = {
+    1: "bottom-[2.5%] left-[2.5%]",
+    2: "top-[2.5%] left-[2.5%]",
+    3: "top-[2.5%] right-[2.5%]",
+    4: "bottom-[2.5%] right-[2.5%]",
+  };
+
+  return (
+    <div
+      aria-hidden
+      className={cn(
+        "pointer-events-none absolute z-[1] grid size-[7%] place-items-center border-2 border-void/50 bg-void/40 font-pixel text-[clamp(6px,1.1vh,12px)]",
+        placement[seat],
+        color.text,
+      )}
+      style={{ boxShadow: `2px 2px 0 0 ${color.shadeHex}` }}
+    >
+      {pawnGlyph(seat)}
+    </div>
+  );
+}
+
+function LudoCellView({ cell }: { cell: LudoCell }) {
+  return (
+    <div
+      data-row={cell.row}
+      data-col={cell.col}
+      data-kind={cell.kind}
+      data-seat={cell.seat}
+      className={cn(
+        "relative overflow-hidden",
+        cell.kind === "void" && "bg-void",
+        cell.kind === "path" && "bg-parchment/90",
+        cell.kind === "safe" && "bg-parchment",
+        cell.kind === "center" && "bg-gold",
+      )}
+      style={cellStyle(cell)}
+      title={cellTitle(cell)}
+    >
+      {cell.kind === "safe" && (
+        <span
+          aria-hidden
+          className="absolute inset-[22%] rotate-45 border border-void/30 bg-gold/70"
+        />
+      )}
+      {cell.kind === "entry" && (
+        <span
+          aria-hidden
+          className="absolute inset-[28%] rounded-none"
+          style={{ backgroundColor: yardShade(cell.seat ?? 1) }}
+        />
+      )}
+      {cell.kind === "yard-pad" && (
+        <span
+          aria-hidden
+          className="absolute inset-[18%] border-2 border-void/35 pixel-inset"
+          style={{
+            backgroundColor: "color-mix(in srgb, white 35%, transparent)",
+          }}
+        />
+      )}
+      {cell.kind === "center" && (
+        <span className="absolute inset-0 grid place-items-center font-pixel text-[clamp(4px,0.7vh,8px)] text-void">
+          ★
+        </span>
+      )}
+    </div>
+  );
+}
+
+function cellStyle(cell: LudoCell): React.CSSProperties | undefined {
+  if (cell.kind === "yard" || cell.kind === "yard-pad") {
+    return {
+      backgroundColor: yardHex(cell.seat ?? 1),
+    };
+  }
+  if (cell.kind === "home-lane") {
+    return {
+      backgroundColor: yardHex(cell.seat ?? 1),
+      opacity: 0.85,
+    };
+  }
+  if (cell.kind === "entry") {
+    return {
+      backgroundColor: `color-mix(in srgb, ${yardHex(cell.seat ?? 1)} 35%, #e8ecf8)`,
+    };
+  }
+  return undefined;
+}
+
+function cellTitle(cell: LudoCell) {
+  const color = cell.seat ? seatColor(cell.seat).label : null;
+  switch (cell.kind) {
+    case "yard":
+      return `${color} yard`;
+    case "yard-pad":
+      return `${color} start pad`;
+    case "home-lane":
+      return `${color} home lane`;
+    case "entry":
+      return `${color} entry`;
+    case "safe":
+      return "Safe spot";
+    case "center":
+      return "Finish";
+    case "path":
+      return "Track";
+    default:
+      return undefined;
+  }
+}

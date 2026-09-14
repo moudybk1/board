@@ -1,0 +1,174 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+
+import { WelcomeStage } from "@/components/welcome/welcome-stage";
+import { PixelButtonLink } from "@/components/ui/pixel-button";
+import { WELCOME_HERO, WELCOME_LIVE_PULSE } from "@/lib/mock/welcome";
+import { prefersReducedMotion } from "@/lib/motion/gsap-config";
+import { cn, formatBoardCompact } from "@/lib/utils";
+
+/**
+ * Conversion hero: solid pitch dock left, living Monopoly + dice right.
+ * Copy never sits on the board; animation never covers the CTAs.
+ */
+export function WelcomeHero({ className }: { className?: string }) {
+  const root = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const node = root.current;
+    if (!node || prefersReducedMotion()) return;
+
+    const brand = node.querySelector<HTMLElement>("[data-hero-brand]");
+    const lines = node.querySelectorAll<HTMLElement>("[data-hero-in]");
+
+    const intro = gsap.timeline();
+    if (brand) {
+      intro.from(brand, {
+        y: 18,
+        duration: 0.55,
+        ease: "power3.out",
+        clearProps: "transform",
+      });
+    }
+    intro.from(
+      lines,
+      {
+        y: 10,
+        duration: 0.35,
+        stagger: 0.055,
+        ease: "power2.out",
+        clearProps: "transform",
+      },
+      "-=0.28",
+    );
+
+    const blink = brand
+      ? gsap.to(brand.querySelector("[data-cursor]"), {
+          opacity: 0,
+          duration: 0.55,
+          repeat: -1,
+          yoyo: true,
+          ease: "steps(1)",
+        })
+      : null;
+
+    return () => {
+      intro.kill();
+      blink?.kill();
+    };
+  }, []);
+
+  return (
+    <section
+      ref={root}
+      className={cn(
+        "relative isolate flex min-h-[100dvh] flex-col overflow-hidden bg-ink pt-14 sm:pt-16",
+        className,
+      )}
+    >
+      <WelcomeStage />
+
+      {/*
+        Two-column shell:
+        - Left: conversion dock (readable solid ink)
+        - Right: empty on purpose so the stage animation reads as the product
+      */}
+      <div className="relative z-20 mx-auto grid w-full max-w-[90rem] flex-1 grid-cols-1 px-3 pb-6 pt-3 sm:px-6 sm:pb-10 lg:grid-cols-2 lg:items-center lg:gap-8 lg:px-10 lg:pb-16 xl:px-14">
+        {/* Mobile: leave top air for dice; desktop: center the dock */}
+        <div className="flex flex-col justify-end pt-[38vh] sm:pt-[32vh] lg:justify-center lg:pt-0">
+          <div className="w-full max-w-[26rem] border-4 border-edge-bright bg-ink p-5 shadow-pixel-lg sm:max-w-[28rem] sm:p-7">
+            <p
+              data-hero-in
+              className="font-pixel text-[10px] uppercase tracking-[0.22em] text-gold"
+            >
+              {WELCOME_HERO.eyebrow}
+            </p>
+
+            <h1
+              data-hero-brand
+              className="mt-3 font-pixel text-[clamp(2.1rem,8vw,3.5rem)] leading-[1.2] tracking-[0.06em] text-gold text-shadow-pixel"
+            >
+              {WELCOME_HERO.brand}
+              <span data-cursor className="ml-1 inline-block text-parchment">
+                _
+              </span>
+            </h1>
+
+            <p
+              data-hero-in
+              className="mt-5 font-pixel text-[14px] leading-[1.65] text-parchment sm:text-[15px]"
+            >
+              {WELCOME_HERO.headline}
+            </p>
+
+            <p
+              data-hero-in
+              className="mt-3 font-pixel text-[11px] leading-[1.9] text-parchment/85 sm:text-[12px]"
+            >
+              {WELCOME_HERO.support}
+            </p>
+
+            <div
+              data-hero-in
+              className="mt-6 flex w-full flex-col gap-3 sm:flex-row sm:items-stretch"
+            >
+              {WELCOME_HERO.ctas.map((cta) => (
+                <PixelButtonLink
+                  key={cta.href}
+                  href={cta.href}
+                  size="lg"
+                  variant={cta.variant}
+                  className="w-full flex-1 justify-center"
+                >
+                  {cta.label}
+                </PixelButtonLink>
+              ))}
+            </div>
+
+            <p
+              data-hero-in
+              className="mt-5 border-t-2 border-edge pt-4 font-pixel text-[10px] leading-[1.8] text-gold sm:text-[11px]"
+            >
+              {WELCOME_HERO.proof}
+            </p>
+
+            <dl
+              data-hero-in
+              className="mt-4 grid grid-cols-3 gap-2 border-t-2 border-edge pt-4"
+            >
+              <div>
+                <dt className="font-pixel text-[8px] uppercase tracking-wider text-faint">
+                  Rooms
+                </dt>
+                <dd className="mt-1 font-pixel text-[11px] text-parchment sm:text-[12px]">
+                  {WELCOME_LIVE_PULSE.openRooms}
+                </dd>
+              </div>
+              <div>
+                <dt className="font-pixel text-[8px] uppercase tracking-wider text-faint">
+                  Seated
+                </dt>
+                <dd className="mt-1 font-pixel text-[11px] text-parchment sm:text-[12px]">
+                  {WELCOME_LIVE_PULSE.playersOnline.toLocaleString("en-US")}
+                </dd>
+              </div>
+              <div>
+                <dt className="font-pixel text-[8px] uppercase tracking-wider text-faint">
+                  Won
+                </dt>
+                <dd className="mt-1 font-pixel text-[11px] text-gold sm:text-[12px]">
+                  {formatBoardCompact(WELCOME_LIVE_PULSE.potToday)}
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+
+        {/* Desktop spacer — keeps the pitch left; animation owns the right half */}
+        <div className="hidden lg:block" aria-hidden />
+      </div>
+    </section>
+  );
+}
