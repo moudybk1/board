@@ -23,7 +23,7 @@ export const WELCOME_HERO = {
   proof: "Real pots. On-chain payout. No IOUs.",
   ctas: [
     { label: "Play now", href: "/lobby", variant: "primary" },
-    { label: "Buy BOARD", href: "/wallet", variant: "secondary" },
+    { label: "Sign in", href: "/account", variant: "secondary" },
   ] as WelcomeCta[],
 };
 
@@ -67,10 +67,9 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
   {
     id: "deposit",
     index: 1,
-    title: "Deposit BOARD",
-    body: "Load your balance once.",
+    title: "Connect wallet",
+    body: "Sign in once with your chain wallet.",
     status: "upcoming",
-    href: "/wallet",
   },
   {
     id: "lobby",
@@ -92,5 +91,5 @@ export const ONBOARDING_STEPS: OnboardingStep[] = [
 
 export const ONBOARDING_ACTIONS: WelcomeCta[] = [
   { label: "Enter lobby", href: "/lobby", variant: "primary" },
-  { label: "Deposit", href: "/wallet", variant: "secondary" },
+  { label: "Sign in", href: "/account", variant: "secondary" },
 ];

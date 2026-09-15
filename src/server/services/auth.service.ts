@@ -248,6 +248,19 @@ export async function resolveSessionToken(token: string | null | undefined) {
 
   if (!dbConfigured()) {
     if (!raw.startsWith("mock_")) return null;
+
+    const { resolveMockWalletSession } = await import(
+      "@/server/services/wallet-auth.service"
+    );
+    const walletSession = resolveMockWalletSession(raw);
+    if (walletSession) {
+      return {
+        user: walletSession.user,
+        sessionId: "mock-wallet-session",
+        source: "mock" as const,
+      };
+    }
+
     return {
       user: {
         id: MOCK_PLAYER.id,

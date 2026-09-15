@@ -2,25 +2,48 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useDisconnect } from "wagmi";
 
 import { PixelButton } from "@/components/ui/pixel-button";
 import { clearBoardSession } from "@/lib/auth/session";
 import { cn } from "@/lib/utils";
 
 /**
- * Sign out · clears mock session storage and returns to the welcome page.
+ * Sign out · revokes server session, clears client keys, disconnects wallet.
  */
-export function LogoutButton({ className }: { className?: string }) {
+export function LogoutButton({
+  className,
+  onLoggedOut,
+}: {
+  className?: string;
+  onLoggedOut?: () => void;
+}) {
   const router = useRouter();
+  const { disconnect } = useDisconnect();
   const [busy, setBusy] = useState(false);
 
-  function logout() {
+  async function logout() {
     setBusy(true);
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+    } catch {
+      // still clear local state
+    }
     clearBoardSession();
-    window.setTimeout(() => {
-      router.push("/");
-      router.refresh();
-    }, 200);
+    try {
+      disconnect();
+    } catch {
+      // ignore
+    }
+    onLoggedOut?.();
+    router.push("/");
+    router.refresh();
+    setBusy(false);
   }
 
   return (
@@ -30,7 +53,7 @@ export function LogoutButton({ className }: { className?: string }) {
       size="md"
       className={cn(className)}
       disabled={busy}
-      onClick={logout}
+      onClick={() => void logout()}
     >
       {busy ? "Signing out…" : "Sign out"}
     </PixelButton>

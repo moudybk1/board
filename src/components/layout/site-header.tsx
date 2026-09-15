@@ -1,23 +1,26 @@
+"use client";
+
 import Link from "next/link";
 
+import { ProfileMenu } from "@/components/account/profile-menu";
+import { SignInButton } from "@/components/account/sign-in-button";
 import { AudioControlsPopover } from "@/components/audio/audio-controls-popover";
 import { AudioMuteToggle } from "@/components/audio/audio-mute-toggle";
 import { MusicToggle } from "@/components/audio/music-toggle";
 import { BoardLogo } from "@/components/layout/board-logo";
 import { BalanceWidget } from "@/components/wallet/balance-widget";
-import { PixelButtonLink } from "@/components/ui/pixel-button";
-import { MOCK_PLAYER } from "@/lib/mock/lobby";
+import { useAuthMe } from "@/hooks/use-auth-me";
 import { cn } from "@/lib/utils";
 
 const NAV_LINKS = [
   { href: "/lobby", label: "Lobby" },
-  { href: "/wallet", label: "Wallet" },
-  { href: "/wins", label: "Wins" },
   { href: "/how-to", label: "Guide" },
   { href: "/settings", label: "Settings" },
 ] as const;
 
 export function SiteHeader({ className }: { className?: string }) {
+  const { authenticated, loading } = useAuthMe();
+
   return (
     <header
       className={cn(
@@ -46,25 +49,21 @@ export function SiteHeader({ className }: { className?: string }) {
           <AudioControlsPopover className="hidden sm:block" />
           <MusicToggle />
           <AudioMuteToggle />
-          <BalanceWidget compact className="hidden sm:inline-flex" />
+          {authenticated ? (
+            <BalanceWidget compact live className="hidden sm:inline-flex" />
+          ) : null}
 
-          <PixelButtonLink
-            href="/wallet"
-            variant="primary"
-            size="sm"
-            className="px-3 text-[8px] sm:text-[9px]"
-          >
-            Deposit
-          </PixelButtonLink>
-
-          <Link
-            href="/account"
-            aria-label="Open account"
-            className="grid size-8 shrink-0 place-items-center border border-edge-bright bg-surface-raised font-mono text-[10px] text-gold sm:size-9"
-            title={MOCK_PLAYER.username}
-          >
-            {MOCK_PLAYER.username.slice(0, 2).toUpperCase()}
-          </Link>
+          {authenticated ? (
+            <ProfileMenu />
+          ) : (
+            <SignInButton
+              variant="primary"
+              size="sm"
+              className="px-3 text-[8px] sm:text-[9px]"
+            >
+              {loading ? "…" : "Sign in"}
+            </SignInButton>
+          )}
         </div>
       </div>
 

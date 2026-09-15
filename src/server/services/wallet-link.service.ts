@@ -3,8 +3,11 @@
  */
 import { and, eq } from "drizzle-orm";
 import { randomBytes } from "node:crypto";
+import { verifyMessage } from "viem";
 
 import { MOCK_ACCOUNT } from "@/lib/mock/account";
+import { ROBINHOOD_CHAIN_LABEL } from "@/lib/wallet/chains";
+import { buildWalletVerifyMessage } from "@/lib/wallet/siwe";
 import { getDb } from "@/server/db";
 import { userBalances, wallets } from "@/server/db/schema";
 
@@ -22,7 +25,54 @@ export class WalletLinkError extends Error {
   }
 }
 
-const DEFAULT_CHAIN = "Robinhood Chain";
+const DEFAULT_CHAIN = ROBINHOOD_CHAIN_LABEL;
+
+function allowMockWalletVerify() {
+  return (
+    process.env.NODE_ENV !== "production" &&
+    process.env.ALLOW_MOCK_WALLET_VERIFY === "true"
+  );
+}
+
+async function assertWalletSignature(input: {
+  address: string;
+  nonce: string;
+  signature: string;
+  message?: string;
+}) {
+  const expected = buildWalletVerifyMessage({
+    address: input.address,
+    nonce: input.nonce,
+  });
+  const message = input.message?.trim() || expected;
+
+  if (message !== expected) {
+    throw new WalletLinkError("Signed message does not match verify challenge.", 401);
+  }
+
+  if (allowMockWalletVerify() && input.signature === "mock-signed") {
+    return;
+  }
+
+  if (allowMockWalletVerify() && input.signature === input.nonce) {
+    return;
+  }
+
+  let valid = false;
+  try {
+    valid = await verifyMessage({
+      address: input.address as `0x${string}`,
+      message,
+      signature: input.signature as `0x${string}`,
+    });
+  } catch {
+    valid = false;
+  }
+
+  if (!valid) {
+    throw new WalletLinkError("Invalid wallet signature.", 401);
+  }
+}
 
 export type WalletView = {
   id: string;
@@ -141,15 +191,15 @@ export async function connectWallet(input: {
 }
 
 /**
- * Verify wallet ownership. Until RPC/SIWE lands, accept:
- * - `signature === verifyNonce`, or
- * - `signature === "mock-signed"`.
+ * Verify wallet ownership via EIP-191 personal_sign of the BOARD challenge.
+ * Local-only mock signatures require ALLOW_MOCK_WALLET_VERIFY=true.
  */
 export async function verifyWallet(input: {
   userId: string;
   walletId?: string;
   address?: string;
   signature: string;
+  message?: string;
 }): Promise<{ wallet: WalletView; source: "database" | "mock" }> {
   const signature = input.signature.trim();
   if (!signature) {
@@ -160,6 +210,27 @@ export async function verifyWallet(input: {
     const address = input.address
       ? normalizeAddress(input.address)
       : MOCK_ACCOUNT.walletAddress.toLowerCase();
+
+    const nonceFromMessage = input.message
+      ? /Nonce:\s*(board-[a-f0-9]+)/i.exec(input.message)?.[1]
+      : undefined;
+
+    if (nonceFromMessage) {
+      await assertWalletSignature({
+        address,
+        nonce: nonceFromMessage,
+        signature,
+        message: input.message,
+      });
+    } else if (allowMockWalletVerify() && signature === "mock-signed") {
+      // Local demo only.
+    } else {
+      throw new WalletLinkError(
+        "message with nonce is required to verify without a database.",
+        400,
+      );
+    }
+
     return {
       wallet: {
         id: input.walletId ?? "wal_mock",
@@ -208,13 +279,16 @@ export async function verifyWallet(input: {
       throw new WalletLinkError("Wallet not found.", 404);
     }
 
-    const ok =
-      signature === "mock-signed" ||
-      (row.verifyNonce !== null && signature === row.verifyNonce);
-
-    if (!ok) {
-      throw new WalletLinkError("Invalid wallet signature.", 401);
+    if (!row.verifyNonce) {
+      throw new WalletLinkError("No pending verify challenge. Reconnect the wallet.", 400);
     }
+
+    await assertWalletSignature({
+      address: row.address,
+      nonce: row.verifyNonce,
+      signature,
+      message: input.message,
+    });
 
     const now = new Date();
     const [updated] = await tx

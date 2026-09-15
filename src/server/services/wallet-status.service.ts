@@ -1,4 +1,3 @@
-import { MOCK_NETWORK, MOCK_WALLET_BALANCE } from "@/lib/mock/wallet";
 import { getUserBalance } from "@/server/services/balance.service";
 import { getRoomEconomyConfig } from "@/server/services/economy.service";
 
@@ -51,14 +50,26 @@ export async function getWalletStatus(
     warning = `Your wallet is on ${balance.chain}. Switch to ${expectedChain} to move BOARD.`;
   }
 
-  // Mock mode always reports the curated network banner state when connected.
+  // Mock mode: report disconnected until a real wallet session is linked via API.
+  // The client banner also reads wagmi connection state separately.
   const network: NetworkStatus = !dbConfigured()
     ? {
-        chain: MOCK_NETWORK.chain,
+        chain: expectedChain,
         expectedChain,
-        connected: MOCK_NETWORK.connected,
-        walletAddress: MOCK_WALLET_BALANCE.address,
-        warning: MOCK_NETWORK.warning,
+        connected: Boolean(
+          balance.address &&
+            balance.address !== "0x0000000000000000000000000000000000000000",
+        ),
+        walletAddress:
+          balance.address &&
+          balance.address !== "0x0000000000000000000000000000000000000000"
+            ? balance.address
+            : null,
+        warning:
+          balance.address &&
+          balance.address !== "0x0000000000000000000000000000000000000000"
+            ? null
+            : "Connect a Robinhood Chain wallet before depositing or withdrawing.",
       }
     : {
         chain: balance.chain,

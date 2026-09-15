@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 
 import { BalanceStrip } from "@/components/lobby/balance-strip";
 import { LobbyBoard } from "@/components/lobby/lobby-board";
-import { SiteHeader } from "@/components/layout/site-header";
+import { HeroStat, PageHero } from "@/components/layout/page-hero";
+import { ProductShell } from "@/components/layout/product-shell";
+import { LobbyHeroActions } from "@/components/lobby/lobby-hero-actions";
 import { RoomEconomyHighlight } from "@/components/ui/room-economy-highlight";
 import {
   ENTRY_FEE_TIERS,
@@ -11,6 +13,7 @@ import {
   MOCK_NOW,
   MOCK_ROOMS,
 } from "@/lib/mock/lobby";
+import { formatBoardCompact } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Lobby | BOARD",
@@ -20,41 +23,83 @@ export const metadata: Metadata = {
 
 export default function LobbyPage() {
   const balance = MOCK_BALANCE;
+  const openRooms = MOCK_ROOMS.filter((room) => room.status === "waiting");
+  const playingNow = GAME_OPTIONS.reduce(
+    (sum, game) => sum + game.activePlayers,
+    0,
+  );
+  const cheapest = Math.min(...openRooms.map((room) => room.entryFee));
 
   return (
-    <div className="board-atmosphere flex min-h-full flex-col">
-      <SiteHeader />
+    <ProductShell accent="mint" width="wide">
+      <PageHero
+        title="Sit a table. Win the pot."
+        support="Four seats. One winner. Stake BOARD, crown the board, keep 98% of the pot."
+        meta={
+          <>
+            <HeroStat
+              label="Playing"
+              value={formatBoardCompact(playingNow)}
+              pulse
+            />
+            <HeroStat label="Open" value={String(openRooms.length)} />
+            <HeroStat
+              label="From"
+              value={`${formatBoardCompact(cheapest)} BOARD`}
+            />
+          </>
+        }
+        actions={<LobbyHeroActions />}
+        stage={
+          <div className="grid gap-3 sm:grid-cols-2">
+            {GAME_OPTIONS.map((game) => {
+              const monopoly = game.type === "monopoly";
+              return (
+                <div
+                  key={game.type}
+                  className={
+                    monopoly
+                      ? "border-2 border-monopoly/50 bg-monopoly/12 p-4 pixel-inset"
+                      : "border-2 border-ludo/50 bg-ludo/12 p-4 pixel-inset"
+                  }
+                >
+                  <p
+                    className={
+                      monopoly
+                        ? "font-pixel text-[10px] uppercase text-monopoly"
+                        : "font-pixel text-[10px] uppercase text-ludo"
+                    }
+                  >
+                    {game.name}
+                  </p>
+                  <p className="mt-2 text-xs leading-relaxed text-muted">
+                    {game.tagline}
+                  </p>
+                  <p className="mt-3 font-pixel text-[8px] uppercase text-faint">
+                    {game.openRooms} open ·{" "}
+                    {formatBoardCompact(game.activePlayers)} live
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        }
+      />
 
-      <main className="board-container flex-1 py-8 sm:py-10">
-        <div className="mb-8 max-w-2xl">
-          <h1 className="text-sm leading-snug text-parchment sm:text-base">
-            Choose your game
-          </h1>
-          <p className="mt-3 text-[9px] leading-relaxed text-muted sm:text-[10px]">
-            Four players per room, one winner. The pot is every entry fee
-            combined. The winner takes it home minus a 2% fee for treasury and
-            burn.
-          </p>
-        </div>
+      <div
+        data-reveal
+        className="grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]"
+      >
+        <BalanceStrip balance={balance} cheapestEntryFee={cheapest} />
+        <RoomEconomyHighlight
+          entryFee={1_000}
+          seats={4}
+          balance={balance.available}
+          variant="panel"
+        />
+      </div>
 
-        <div className="mb-10 space-y-4">
-          <BalanceStrip
-            balance={balance}
-            cheapestEntryFee={Math.min(
-              ...MOCK_ROOMS.filter((room) => room.status === "waiting").map(
-                (room) => room.entryFee,
-              ),
-            )}
-          />
-          <RoomEconomyHighlight
-            entryFee={1_000}
-            seats={4}
-            balance={balance.available}
-            variant="panel"
-            className="max-w-xl"
-          />
-        </div>
-
+      <div data-reveal>
         <LobbyBoard
           games={GAME_OPTIONS}
           rooms={MOCK_ROOMS}
@@ -63,7 +108,7 @@ export default function LobbyPage() {
           now={MOCK_NOW}
           defaultGame={GAME_OPTIONS[0].type}
         />
-      </main>
-    </div>
+      </div>
+    </ProductShell>
   );
 }

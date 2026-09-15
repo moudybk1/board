@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Wordmark: die face + BOARD. Pixel type reserved for the mark only.
+ * Wordmark: board-game mark + BOARD. Pixel type reserved for the mark only.
  */
 export function BoardLogo({
   className,
@@ -15,17 +15,16 @@ export function BoardLogo({
       )}
       {...props}
     >
-      <span
-        aria-hidden
-        className="grid size-6 shrink-0 place-items-center border border-gold-deep bg-gold text-void sm:size-7"
-      >
-        <span className="grid grid-cols-2 gap-[3px]">
-          <i className="size-[3px] bg-void" />
-          <i className="size-[3px] bg-void" />
-          <i className="size-[3px] bg-void" />
-          <i className="size-[3px] bg-void" />
-        </span>
-      </span>
+      {/* Native img keeps the PNG alpha channel; no white fill behind the mark. */}
+      <img
+        src="/board-logo.png"
+        alt=""
+        width={28}
+        height={28}
+        data-pixel
+        className="size-6 shrink-0 bg-transparent sm:size-7"
+        draggable={false}
+      />
       BOARD
     </span>
   );

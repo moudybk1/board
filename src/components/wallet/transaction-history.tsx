@@ -36,27 +36,33 @@ export function TransactionHistory({ className }: { className?: string }) {
   }, [filter]);
 
   return (
-    <section aria-labelledby="tx-history-title" className={className}>
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <h2
-          id="tx-history-title"
-          className="font-pixel text-[11px] text-parchment"
-        >
-          Transaction history
-        </h2>
-        <p className="font-pixel text-[8px] uppercase text-faint">
-          Newest first
-        </p>
+    <section
+      aria-labelledby="tx-history-title"
+      className={cn("border-2 border-edge bg-void/40 shadow-pixel", className)}
+    >
+      <div className="flex flex-col gap-3 border-b-2 border-edge bg-surface-raised/60 px-4 py-4 sm:flex-row sm:items-end sm:justify-between sm:px-5">
+        <div>
+          <p className="font-pixel text-[8px] uppercase tracking-[0.18em] text-gold">
+            Ledger
+          </p>
+          <h2
+            id="tx-history-title"
+            className="mt-2 font-pixel text-[11px] text-parchment"
+          >
+            Transaction history
+          </h2>
+        </div>
+        <p className="font-pixel text-[8px] uppercase text-faint">Newest first</p>
       </div>
 
-      <div className="mb-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex gap-2 overflow-x-auto border-b-2 border-edge px-4 py-3 sm:px-5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {FILTERS.map((item) => (
           <button
             key={item.id}
             type="button"
             onClick={() => setFilter(item.id)}
             className={cn(
-              "pixel-corners shrink-0 border px-3 py-1.5 font-pixel text-[8px] uppercase",
+              "shrink-0 border-2 px-3 py-1.5 font-pixel text-[8px] uppercase transition-colors",
               filter === item.id
                 ? "border-gold bg-gold/15 text-gold"
                 : "border-edge text-muted hover:border-edge-bright hover:text-parchment",
@@ -68,11 +74,11 @@ export function TransactionHistory({ className }: { className?: string }) {
       </div>
 
       {rows.length === 0 ? (
-        <p className="border-2 border-edge bg-surface/40 px-4 py-6 text-sm text-muted">
+        <p className="px-4 py-8 text-sm text-muted sm:px-5">
           No transactions match this filter.
         </p>
       ) : (
-        <ul className="divide-y-2 divide-edge border-2 border-edge bg-surface/40">
+        <ul className="divide-y-2 divide-edge">
           {rows.map((tx) => (
             <TxRow key={tx.id} tx={tx} now={now} />
           ))}
@@ -84,41 +90,42 @@ export function TransactionHistory({ className }: { className?: string }) {
 
 function TxRow({ tx, now }: { tx: MockTx; now: number }) {
   const positive = tx.amount > 0;
+  const statusTone =
+    tx.status === "confirmed"
+      ? "text-success"
+      : tx.status === "pending"
+        ? "text-gold"
+        : "text-danger";
+
   return (
-    <li className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
-      <div className="min-w-0">
-        <p className="font-pixel text-[10px] capitalize text-parchment">
-          {tx.type.replace("_", " ")}
-        </p>
-        <p className="mt-1 truncate text-xs text-faint">{tx.note}</p>
-        <p className="mt-1 font-pixel text-[8px] text-faint">
-          {formatAge(tx.createdAt, now)}
-        </p>
+    <li className="flex flex-wrap items-center gap-3 px-4 py-4 transition-colors hover:bg-surface-hover/40 sm:px-5">
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="font-pixel text-[10px] uppercase text-parchment">
+            {tx.type.replace("_", " ")}
+          </p>
+          <span className={cn("font-pixel text-[8px] uppercase", statusTone)}>
+            {tx.status}
+          </span>
+        </div>
+        <p className="mt-1.5 text-xs text-muted">{tx.note}</p>
+        <p className="mt-1 text-[10px] text-faint">{formatAge(tx.createdAt, now)}</p>
       </div>
-      <div className="text-right">
-        <BoardAmount
-          value={Math.abs(tx.amount)}
-          size="sm"
-          tone={
-            tx.status === "failed"
-              ? "danger"
-              : positive
-                ? "success"
-                : "default"
-          }
-        />
-        <p
-          className={cn(
-            "mt-1 font-pixel text-[8px] uppercase",
-            tx.status === "confirmed" && "text-success",
-            tx.status === "pending" && "text-gold",
-            tx.status === "failed" && "text-danger",
-          )}
-        >
-          {positive ? "+" : "−"}
-          {tx.status}
-        </p>
-      </div>
+      <BoardAmount
+        value={Math.abs(tx.amount)}
+        tone={
+          tx.status === "failed"
+            ? "danger"
+            : positive
+              ? "gold"
+              : "default"
+        }
+        showTicker={false}
+        className={cn(!positive && tx.status !== "failed" && "opacity-90")}
+      />
+      <span className="w-full font-pixel text-[8px] uppercase text-faint sm:w-auto sm:text-right">
+        {positive ? "in" : "out"}
+      </span>
     </li>
   );
 }

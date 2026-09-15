@@ -28,9 +28,7 @@ export function LobbyBoard({
   games: GameOption[];
   rooms: Room[];
   feeTiers: readonly number[];
-  /** Available balance, used to flag rooms the player cannot afford. */
   balance: number;
-  /** Reference timestamp for room age labels. */
   now: number;
   defaultGame: GameType;
 }) {
@@ -43,8 +41,6 @@ export function LobbyBoard({
     [rooms, selectedGame],
   );
 
-  // Counts come from the unfiltered set for this game so the chips always show
-  // what's actually on offer, not what's left after filtering.
   const countsByTier = useMemo(() => {
     const counts: Record<number, number> = {};
     for (const room of gameRooms) {
@@ -68,17 +64,20 @@ export function LobbyBoard({
 
   return (
     <>
-      <section aria-labelledby="games" className="mb-12">
-        <PixelHeading as="h2" id="games" size="sm" className="mb-4">
-          Games
-        </PixelHeading>
+      <section aria-labelledby="game" className="mb-10 sm:mb-12">
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+          <PixelHeading as="h2" id="game" size="sm">
+            Pick your board
+          </PixelHeading>
+          <p className="max-w-xs text-xs leading-relaxed text-faint">
+            One tap selects the game. Tables below update instantly.
+          </p>
+        </div>
         <GamePicker
           games={games}
           selected={selectedGame}
           onSelect={(game) => {
             setSelectedGame(game);
-            // Tiers differ per game, so a stale fee filter would silently
-            // empty the list after switching.
             setFeeFilter(null);
           }}
         />

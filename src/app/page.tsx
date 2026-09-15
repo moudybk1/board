@@ -5,6 +5,10 @@ import { OnboardingPath } from "@/components/welcome/onboarding-path";
 import { TokenRoadmapSection } from "@/components/welcome/token-roadmap-section";
 import { WelcomeHero } from "@/components/welcome/welcome-hero";
 import { WelcomeHighlights } from "@/components/welcome/welcome-highlights";
+import {
+  getBoardTokenAddress,
+  getBoardTokenExplorerUrl,
+} from "@/lib/wallet/chains";
 
 export const metadata: Metadata = {
   title: "BOARD | Pixel Monopoly & Ludo with real pots",
@@ -13,11 +17,17 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
+  const tokenAddress = getBoardTokenAddress();
+  const tokenExplorerUrl = getBoardTokenExplorerUrl();
+
   return (
     <div className="board-atmosphere flex min-h-full flex-col">
       <SiteHeader />
       <main className="flex flex-1 flex-col">
-        <WelcomeHero />
+        <WelcomeHero
+          tokenAddress={tokenAddress}
+          tokenExplorerUrl={tokenExplorerUrl}
+        />
         <WelcomeHighlights />
         <OnboardingPath />
         <TokenRoadmapSection />

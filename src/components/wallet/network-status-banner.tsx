@@ -1,46 +1,54 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useAccount, useSwitchChain } from "wagmi";
 
+import { useSignIn } from "@/components/account/sign-in-provider";
 import { PixelButton } from "@/components/ui/pixel-button";
-import { MOCK_NETWORK, type MockNetworkStatus } from "@/lib/mock/wallet";
+import { usePlatformWallet } from "@/hooks/use-platform-wallet";
+import {
+  getBoardChainId,
+  ROBINHOOD_CHAIN_LABEL,
+  shortenAddress,
+} from "@/lib/wallet/chains";
 import { cn } from "@/lib/utils";
 
-const DISCONNECTED: MockNetworkStatus = {
-  chain: "Robinhood Chain",
-  connected: false,
-  walletLabel: "No wallet connected",
-  warning: "Connect a Robinhood Chain wallet before depositing or withdrawing.",
-};
-
-const WRONG_NETWORK: MockNetworkStatus = {
-  chain: "Wrong network",
-  connected: true,
-  walletLabel: MOCK_NETWORK.walletLabel,
-  warning:
-    "Your wallet is on the wrong network. Switch to Robinhood Chain to move BOARD.",
-};
-
 /**
- * Mock network + wallet status strip with a demo toggle for warning states.
+ * Live network + wallet status for deposit/withdraw readiness.
  */
 export function NetworkStatusBanner({ className }: { className?: string }) {
-  const [mode, setMode] = useState<"ok" | "disconnected" | "wrong">(
-    "ok",
-  );
+  const expectedChainId = getBoardChainId();
+  const { address, isConnected, chainId } = useAccount();
+  const { switchChain, isPending } = useSwitchChain();
+  const { data, loading } = usePlatformWallet();
+  const { openSignIn } = useSignIn();
 
-  const status =
-    mode === "ok"
-      ? MOCK_NETWORK
-      : mode === "disconnected"
-        ? DISCONNECTED
-        : WRONG_NETWORK;
+  const wrongNetwork =
+    isConnected && typeof chainId === "number" && chainId !== expectedChainId;
+  const linked = Boolean(data?.network.connected && data.network.walletAddress);
+  const connected = isConnected && !wrongNetwork;
 
-  const tone = status.connected && !status.warning
-    ? "ok"
-    : status.connected
+  const tone = !isConnected
+    ? "bad"
+    : wrongNetwork
       ? "warn"
-      : "bad";
+      : linked
+        ? "ok"
+        : "warn";
+
+  const walletLabel = address
+    ? shortenAddress(address)
+    : data?.network.walletAddress
+      ? shortenAddress(data.network.walletAddress)
+      : "No wallet connected";
+
+  const warning = !isConnected
+    ? "Connect a Robinhood Chain wallet before depositing or withdrawing."
+    : wrongNetwork
+      ? `Your wallet is on the wrong network. Switch to ${ROBINHOOD_CHAIN_LABEL} (chain ID ${expectedChainId}).`
+      : !linked
+        ? "Wallet connected · sign in to link it to your BOARD profile."
+        : null;
 
   return (
     <div className={cn("space-y-3", className)}>
@@ -55,7 +63,13 @@ export function NetworkStatusBanner({ className }: { className?: string }) {
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="font-pixel text-[9px] uppercase tracking-wide text-parchment">
-            {status.connected ? "Wallet connected" : "Wallet disconnected"}
+            {loading
+              ? "Checking wallet…"
+              : connected
+                ? linked
+                  ? "Wallet linked"
+                  : "Wallet connected"
+                : "Wallet disconnected"}
           </p>
           <p
             className={cn(
@@ -65,11 +79,11 @@ export function NetworkStatusBanner({ className }: { className?: string }) {
               tone === "bad" && "text-danger",
             )}
           >
-            {status.chain}
+            {wrongNetwork ? "Wrong network" : ROBINHOOD_CHAIN_LABEL}
           </p>
         </div>
-        <p className="mt-2 text-xs text-muted">{status.walletLabel}</p>
-        {status.warning ? (
+        <p className="mt-2 text-xs text-muted">{walletLabel}</p>
+        {warning ? (
           <p
             role="alert"
             className={cn(
@@ -77,40 +91,49 @@ export function NetworkStatusBanner({ className }: { className?: string }) {
               tone === "bad" ? "text-danger" : "text-gold",
             )}
           >
-            {status.warning}
+            {warning}
           </p>
         ) : (
           <p className="mt-3 text-sm text-muted">
-            Ready to deposit or withdraw on Robinhood Chain.
+            Ready to deposit or withdraw on {ROBINHOOD_CHAIN_LABEL}.
           </p>
         )}
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <PixelButton
-          type="button"
-          size="sm"
-          variant={mode === "ok" ? "primary" : "outline"}
-          onClick={() => setMode("ok")}
-        >
-          Connected
-        </PixelButton>
-        <PixelButton
-          type="button"
-          size="sm"
-          variant={mode === "disconnected" ? "primary" : "outline"}
-          onClick={() => setMode("disconnected")}
-        >
-          Disconnect demo
-        </PixelButton>
-        <PixelButton
-          type="button"
-          size="sm"
-          variant={mode === "wrong" ? "primary" : "outline"}
-          onClick={() => setMode("wrong")}
-        >
-          Wrong network
-        </PixelButton>
+        {!isConnected ? (
+          <PixelButton type="button" size="sm" onClick={openSignIn}>
+            Sign in with wallet
+          </PixelButton>
+        ) : null}
+        {wrongNetwork ? (
+          <PixelButton
+            type="button"
+            size="sm"
+            onClick={() => switchChain({ chainId: expectedChainId })}
+            disabled={isPending}
+          >
+            {isPending ? "Switching…" : "Switch network"}
+          </PixelButton>
+        ) : null}
+        {isConnected && !wrongNetwork && !linked ? (
+          <PixelButton
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={openSignIn}
+          >
+            Sign in to link
+          </PixelButton>
+        ) : null}
+        {isConnected ? (
+          <Link
+            href="/account"
+            className="px-3 py-2 font-pixel text-[8px] uppercase text-muted hover:text-gold"
+          >
+            Account
+          </Link>
+        ) : null}
       </div>
     </div>
   );

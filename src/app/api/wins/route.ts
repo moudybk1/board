@@ -1,15 +1,13 @@
 import { NextResponse } from "next/server";
 
-import { MOCK_PLAYER } from "@/lib/mock/lobby";
+import { resolveRequestUser } from "@/server/lib/resolve-user";
 import { listWinHistory } from "@/server/services/wins.service";
 
 /**
  * GET /api/wins · current user's win / payout history (newest first).
- * Header: `x-user-id` (falls back to mock player).
  */
 export async function GET(request: Request) {
-  const userId =
-    request.headers.get("x-user-id")?.trim() || MOCK_PLAYER.id;
+  const { userId } = await resolveRequestUser(request);
 
   try {
     const result = await listWinHistory(userId);

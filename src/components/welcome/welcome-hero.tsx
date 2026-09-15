@@ -3,17 +3,32 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 
+import { TokenCaPromo } from "@/components/welcome/token-ca-promo";
 import { WelcomeStage } from "@/components/welcome/welcome-stage";
+import {
+  SignInButton,
+} from "@/components/account/sign-in-button";
 import { PixelButtonLink } from "@/components/ui/pixel-button";
 import { WELCOME_HERO, WELCOME_LIVE_PULSE } from "@/lib/mock/welcome";
 import { prefersReducedMotion } from "@/lib/motion/gsap-config";
+import { ROBINHOOD_CHAIN_LABEL } from "@/lib/wallet/chains";
 import { cn, formatBoardCompact } from "@/lib/utils";
+
+type WelcomeHeroProps = {
+  className?: string;
+  tokenAddress: `0x${string}` | null;
+  tokenExplorerUrl: string | null;
+};
 
 /**
  * Conversion hero: solid pitch dock left, living Monopoly + dice right.
  * Copy never sits on the board; animation never covers the CTAs.
  */
-export function WelcomeHero({ className }: { className?: string }) {
+export function WelcomeHero({
+  className,
+  tokenAddress,
+  tokenExplorerUrl,
+}: WelcomeHeroProps) {
   const root = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -44,19 +59,8 @@ export function WelcomeHero({ className }: { className?: string }) {
       "-=0.28",
     );
 
-    const blink = brand
-      ? gsap.to(brand.querySelector("[data-cursor]"), {
-          opacity: 0,
-          duration: 0.55,
-          repeat: -1,
-          yoyo: true,
-          ease: "steps(1)",
-        })
-      : null;
-
     return () => {
       intro.kill();
-      blink?.kill();
     };
   }, []);
 
@@ -91,9 +95,6 @@ export function WelcomeHero({ className }: { className?: string }) {
               className="mt-3 font-pixel text-[clamp(2.1rem,8vw,3.5rem)] leading-[1.2] tracking-[0.06em] text-gold text-shadow-pixel"
             >
               {WELCOME_HERO.brand}
-              <span data-cursor className="ml-1 inline-block text-parchment">
-                _
-              </span>
             </h1>
 
             <p
@@ -114,17 +115,31 @@ export function WelcomeHero({ className }: { className?: string }) {
               data-hero-in
               className="mt-6 flex w-full flex-col gap-3 sm:flex-row sm:items-stretch"
             >
-              {WELCOME_HERO.ctas.map((cta) => (
-                <PixelButtonLink
-                  key={cta.href}
-                  href={cta.href}
-                  size="lg"
-                  variant={cta.variant}
-                  className="w-full flex-1 justify-center"
-                >
-                  {cta.label}
-                </PixelButtonLink>
-              ))}
+              <PixelButtonLink
+                href="/lobby"
+                size="lg"
+                variant="primary"
+                className="w-full flex-1 justify-center"
+              >
+                Play now
+              </PixelButtonLink>
+              <SignInButton
+                size="lg"
+                variant="secondary"
+                className="w-full flex-1 justify-center"
+              >
+                Sign in
+              </SignInButton>
+            </div>
+
+            <div data-hero-in>
+              <TokenCaPromo
+                className="mt-5"
+                compact
+                address={tokenAddress}
+                explorerUrl={tokenExplorerUrl}
+                chainLabel={ROBINHOOD_CHAIN_LABEL}
+              />
             </div>
 
             <p

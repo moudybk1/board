@@ -35,9 +35,6 @@ function mapMock(win: typeof MOCK_WIN_RESULT) {
  */
 export async function listWinHistory(userId: string) {
   if (!dbConfigured()) {
-    if (userId !== MOCK_PLAYER.id && userId !== "me") {
-      return { wins: [], source: "mock" as const };
-    }
     return {
       wins: MOCK_WIN_HISTORY.map(mapMock),
       source: "mock" as const,

@@ -86,15 +86,24 @@ export function WelcomeHighlights({ className }: { className?: string }) {
               key={mode.id}
               data-mode-row
               className={cn(
-                "grid items-center gap-8 lg:grid-cols-2 lg:gap-14",
+                "grid items-center gap-10 overflow-visible lg:grid-cols-2 lg:gap-14",
                 index % 2 === 1 && "lg:[&>*:first-child]:order-2",
               )}
             >
               <div className="relative mx-auto w-full max-w-sm lg:max-w-md">
-                <mode.Demo className="shadow-pixel-lg" />
+                <div className="relative overflow-visible rounded-none border-2 border-edge-bright bg-void/50 p-4 shadow-pixel-lg pixel-inset sm:p-5">
+                  <div
+                    aria-hidden
+                    className={cn(
+                      "pointer-events-none absolute inset-x-8 bottom-3 h-8 rounded-[100%] blur-xl",
+                      mode.id === "monopoly" ? "bg-monopoly/30" : "bg-ludo/30",
+                    )}
+                  />
+                  <mode.Demo className="relative z-[1]" />
+                </div>
                 <span
                   className={cn(
-                    "absolute -bottom-3 left-4 border-2 bg-ink px-3 py-1 font-pixel text-[9px] uppercase",
+                    "absolute -bottom-3 left-6 z-10 border-2 bg-ink px-3 py-1 font-pixel text-[9px] uppercase shadow-pixel-sm",
                     mode.accent,
                   )}
                 >

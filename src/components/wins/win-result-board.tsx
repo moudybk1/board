@@ -128,12 +128,12 @@ export function WinResultBoard({
           Back to lobby
         </PixelButtonLink>
         <PixelButtonLink
-          href="/wallet"
+          href="/"
           variant="secondary"
           size="lg"
           className="w-full sm:flex-1"
         >
-          View wallet
+          Home
         </PixelButtonLink>
       </div>
     </div>

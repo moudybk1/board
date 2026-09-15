@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
-import { SiteHeader } from "@/components/layout/site-header";
+import { ProductShell } from "@/components/layout/product-shell";
+import { HeroStat, PageHero } from "@/components/layout/page-hero";
 import { HowToSteps } from "@/components/welcome/how-to-steps";
+import { HowToHeroActions } from "@/components/welcome/how-to-hero-actions";
 import { WinGoalCompare } from "@/components/welcome/win-goal-compare";
-import { HOW_TO_INTRO } from "@/lib/mock/how-to";
+import { HOW_TO_INTRO, HOW_TO_STEPS } from "@/lib/mock/how-to";
 
 export const metadata: Metadata = {
   title: "How to play | BOARD",
@@ -14,34 +15,44 @@ export const metadata: Metadata = {
 
 export default function HowToPage() {
   return (
-    <>
-      <SiteHeader />
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10 sm:px-6 sm:py-14 md:max-w-4xl">
-        <nav className="mb-8 font-pixel text-[9px] uppercase tracking-wide text-faint">
-          <Link href="/" className="hover:text-gold">
-            Welcome
-          </Link>
-          <span className="mx-2 text-edge-bright" aria-hidden>
-            /
-          </span>
-          <span className="text-muted">How to play</span>
-        </nav>
+    <ProductShell accent="monopoly">
+      <PageHero
+        title={HOW_TO_INTRO.title}
+        support={HOW_TO_INTRO.support}
+        meta={
+          <>
+            <HeroStat label="Steps" value={String(HOW_TO_STEPS.length)} />
+            <HeroStat label="Keep" value="98%" />
+            <HeroStat label="Seats" value="4" />
+          </>
+        }
+        actions={<HowToHeroActions />}
+        stage={
+          <div className="grid grid-cols-2 gap-2">
+            {HOW_TO_STEPS.slice(0, 4).map((step) => (
+              <div
+                key={step.id}
+                className="flex items-center gap-2 border-2 border-edge bg-ink/75 px-2.5 py-2.5 pixel-inset"
+              >
+                <span className="grid size-7 shrink-0 place-items-center border-2 border-gold-deep bg-gold font-pixel text-[9px] text-void">
+                  {step.number}
+                </span>
+                <span className="font-pixel text-[7px] uppercase leading-relaxed text-parchment">
+                  {step.title}
+                </span>
+              </div>
+            ))}
+          </div>
+        }
+      />
 
-        <header className="mb-10 border-b-2 border-edge pb-8">
-          <p className="font-pixel text-[9px] uppercase tracking-widest text-gold">
-            Guide
-          </p>
-          <h1 className="mt-3 font-pixel text-lg text-parchment text-shadow-pixel sm:text-xl">
-            {HOW_TO_INTRO.title}
-          </h1>
-          <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted">
-            {HOW_TO_INTRO.support}
-          </p>
-        </header>
-
+      <div data-reveal>
         <HowToSteps />
-        <WinGoalCompare className="mt-12" />
-      </main>
-    </>
+      </div>
+
+      <div data-reveal>
+        <WinGoalCompare />
+      </div>
+    </ProductShell>
   );
 }

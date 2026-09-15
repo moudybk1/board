@@ -1,96 +1,88 @@
-import { ArrowDownToLine, ArrowUpFromLine, Link2, Lock } from "lucide-react";
+import { Link2, Lock, Sparkles } from "lucide-react";
 
 import { BoardAmount } from "@/components/ui/board-amount";
 import { PixelBadge } from "@/components/ui/pixel-badge";
-import { PixelButtonLink } from "@/components/ui/pixel-button";
 import { PixelLabel } from "@/components/ui/pixel-label";
-import { PixelPanel } from "@/components/ui/pixel-panel";
 import type { WalletBalance } from "@/lib/types";
-import { formatBoard } from "@/lib/utils";
+import { cn, formatBoard } from "@/lib/utils";
 
 function shortAddress(address: string) {
+  if (!address || address.length < 10) return "—";
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
 
-/** Balance at a glance, so the player can judge which rooms they can afford. */
+/** Balance vault strip — stakes at a glance before joining a room. */
 export function BalanceStrip({
   balance,
-  /** Cheapest entry fee on offer · drives the "top up" hint. */
   cheapestEntryFee,
+  className,
 }: {
   balance: WalletBalance;
   cheapestEntryFee?: number;
+  className?: string;
 }) {
   const cannotPlay =
     cheapestEntryFee !== undefined && balance.available < cheapestEntryFee;
 
   return (
-    <PixelPanel
-      tone="gold"
-      className="flex flex-col gap-4 p-4 sm:flex-row sm:flex-wrap sm:items-center sm:gap-6 sm:p-5"
+    <section
+      className={cn(
+        "relative overflow-hidden border-2 border-gold/50 bg-void/70 shadow-pixel-gold",
+        className,
+      )}
     >
-      <div>
-        <PixelLabel className="text-gold/70">Available balance</PixelLabel>
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-8 -top-10 size-40 rounded-full bg-gold/10 blur-2xl"
+      />
+      <div className="relative p-5 sm:p-6">
+        <div className="flex flex-wrap items-center gap-2">
+          <PixelLabel className="text-gold/80">Available to stake</PixelLabel>
+          <PixelBadge tone="gold">
+            <Sparkles className="size-3" aria-hidden />
+            Ready
+          </PixelBadge>
+        </div>
         <BoardAmount
           value={balance.available}
           size="xl"
           tone="gold"
-          className="mt-2"
+          className="mt-3"
         />
+        <div className="mt-4 flex flex-wrap items-center gap-4">
+          <div>
+            <PixelLabel className="flex items-center gap-1.5 text-faint">
+              <Lock className="size-3" aria-hidden />
+              Locked in rooms
+            </PixelLabel>
+            <BoardAmount
+              value={balance.locked}
+              tone="muted"
+              showTicker={false}
+              className="mt-1.5"
+            />
+          </div>
+          <div className="border-l-2 border-edge pl-4">
+            <PixelBadge tone="gold">
+              <Link2 className="size-3" aria-hidden />
+              {balance.chain}
+            </PixelBadge>
+            <p className="mt-2 font-mono text-[10px] text-faint">
+              {shortAddress(balance.address)}
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="border-t-2 border-gold/20 pt-4 sm:border-l-2 sm:border-t-0 sm:pl-6 sm:pt-0">
-        <PixelLabel className="flex items-center gap-1.5 text-faint">
-          <Lock className="size-3" aria-hidden />
-          In play
-        </PixelLabel>
-        <BoardAmount
-          value={balance.locked}
-          tone="muted"
-          showTicker={false}
-          className="mt-2"
-        />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <PixelBadge tone="gold">
-          <Link2 className="size-3" aria-hidden />
-          {balance.chain}
-        </PixelBadge>
-        <span className="font-mono text-[10px] text-faint">
-          {shortAddress(balance.address)}
-        </span>
-      </div>
-
-      <div className="flex w-full gap-2 sm:ml-auto sm:w-auto">
-        <PixelButtonLink
-          href="/wallet/deposit"
-          variant="primary"
-          size="sm"
-          className="flex-1 justify-center sm:flex-none"
+      {cannotPlay ? (
+        <p
+          role="alert"
+          className="border-t-2 border-danger/40 bg-danger/10 px-5 py-3 text-xs text-danger sm:px-6"
         >
-          <ArrowDownToLine className="size-3" aria-hidden />
-          Deposit
-        </PixelButtonLink>
-        <PixelButtonLink
-          href="/wallet/withdraw"
-          variant="outline"
-          size="sm"
-          className="flex-1 justify-center sm:flex-none"
-        >
-          <ArrowUpFromLine className="size-3" aria-hidden />
-          Withdraw
-        </PixelButtonLink>
-      </div>
-
-      {cannotPlay && (
-        <p className="w-full border-t-2 border-gold/20 pt-4 text-xs text-danger">
-          Your balance is below the cheapest room ({formatBoard(
-            cheapestEntryFee,
-          )}{" "}
-          BOARD). Deposit to join a table.
+          Balance is below the cheapest open table (
+          {formatBoard(cheapestEntryFee)} BOARD).
         </p>
-      )}
-    </PixelPanel>
+      ) : null}
+    </section>
   );
 }

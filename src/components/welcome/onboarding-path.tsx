@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 
+import { SignInButton } from "@/components/account/sign-in-button";
 import { PixelButtonLink } from "@/components/ui/pixel-button";
 import { ONBOARDING_ACTIONS, ONBOARDING_STEPS } from "@/lib/mock/welcome";
 import { cn } from "@/lib/utils";
 
 /**
- * Compact sit-down strip · deposit, pick, win.
+ * Compact sit-down strip · connect, pick, win.
  */
 export function OnboardingPath({ className }: { className?: string }) {
   return (
@@ -38,7 +39,15 @@ export function OnboardingPath({ className }: { className?: string }) {
                 <span className="font-pixel text-[9px] text-gold">
                   0{step.index}
                 </span>
-                {step.href ? (
+                {step.id === "deposit" ? (
+                  <SignInButton
+                    variant="ghost"
+                    size="sm"
+                    className="mt-2 justify-start px-0 text-[10px] text-parchment shadow-none hover:text-gold"
+                  >
+                    {step.title}
+                  </SignInButton>
+                ) : step.href ? (
                   <Link
                     href={step.href}
                     className="mt-2 text-[10px] text-parchment hover:text-gold"
@@ -64,17 +73,28 @@ export function OnboardingPath({ className }: { className?: string }) {
           </ol>
 
           <div className="flex shrink-0 flex-col gap-2 sm:flex-row lg:flex-col">
-            {ONBOARDING_ACTIONS.map((cta) => (
-              <PixelButtonLink
-                key={cta.href}
-                href={cta.href}
-                variant={cta.variant}
-                size="md"
-                className="justify-center"
-              >
-                {cta.label}
-              </PixelButtonLink>
-            ))}
+            {ONBOARDING_ACTIONS.map((cta) =>
+              cta.label === "Sign in" ? (
+                <SignInButton
+                  key={cta.label}
+                  variant={cta.variant}
+                  size="md"
+                  className="justify-center"
+                >
+                  Sign in
+                </SignInButton>
+              ) : (
+                <PixelButtonLink
+                  key={cta.href}
+                  href={cta.href}
+                  variant={cta.variant}
+                  size="md"
+                  className="justify-center"
+                >
+                  {cta.label}
+                </PixelButtonLink>
+              ),
+            )}
           </div>
         </div>
       </div>

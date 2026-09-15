@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { SiteHeader } from "@/components/layout/site-header";
+import { ProductShell } from "@/components/layout/product-shell";
+import { HeroStat, PageHero } from "@/components/layout/page-hero";
 import { SettingsBoard } from "@/components/settings/settings-board";
-import { PixelHeading, PixelLabel } from "@/components/ui";
+import { PixelButtonLink } from "@/components/ui/pixel-button";
 
 export const metadata: Metadata = {
   title: "Settings | BOARD",
@@ -12,28 +13,44 @@ export const metadata: Metadata = {
 
 export default function SettingsPage() {
   return (
-    <div className="board-atmosphere flex min-h-full flex-col">
-      <SiteHeader />
-      <main className="board-container flex-1 py-8 sm:py-10">
-        <div className="mb-8 max-w-2xl">
-          <PixelLabel>Preferences</PixelLabel>
-          <PixelHeading as="h1" size="xl" className="mt-2">
-            Settings
-          </PixelHeading>
-          <p className="mt-3 text-sm leading-relaxed text-muted">
-            Tune motion, CRT scanlines, sound effects, and background music.
-            Changes stay on this device.
-          </p>
-          <p className="mt-2 text-xs text-faint">
-            Also reachable from{" "}
-            <Link href="/account" className="text-gold hover:underline">
-              Account
-            </Link>
-            .
-          </p>
-        </div>
+    <ProductShell accent="mint">
+      <PageHero
+        title="Settings"
+        support="Motion, CRT scanlines, SFX, and music — saved on this device."
+        meta={
+          <>
+            <HeroStat label="Scope" value="This device" />
+            <HeroStat label="Look" value="Phosphor" />
+          </>
+        }
+        actions={
+          <PixelButtonLink href="/account" variant="ghost" size="md">
+            Wallet account
+          </PixelButtonLink>
+        }
+        stage={
+          <div className="border-2 border-edge-bright bg-ink/85 p-4 pixel-inset sm:p-5">
+            <p className="font-pixel text-[8px] uppercase tracking-widest text-gold">
+              Tips
+            </p>
+            <ul className="mt-3 space-y-2 text-xs leading-relaxed text-muted">
+              <li>Reduce motion softens dice hops and idle bobbing.</li>
+              <li>Scanlines recreate the CRT cabinet look.</li>
+              <li>
+                Also on{" "}
+                <Link href="/account" className="text-gold hover:underline">
+                  Account
+                </Link>
+                .
+              </li>
+            </ul>
+          </div>
+        }
+      />
+
+      <div data-reveal>
         <SettingsBoard />
-      </main>
-    </div>
+      </div>
+    </ProductShell>
   );
 }

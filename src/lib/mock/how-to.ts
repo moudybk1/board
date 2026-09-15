@@ -49,6 +49,6 @@ export const HOW_TO_STEPS: HowToStep[] = [
 ];
 
 export const HOW_TO_CTAS = [
-  { label: "Deposit", href: "/wallet", variant: "primary" as const },
+  { label: "Sign in", href: "/account", variant: "primary" as const },
   { label: "Enter lobby", href: "/lobby", variant: "secondary" as const },
 ];

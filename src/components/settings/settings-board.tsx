@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Dice5, Monitor, Volume2 } from "lucide-react";
 
 import { AudioVolumeControls } from "@/components/audio/audio-volume-controls";
 import { audioManager, playSfx, unlockAudio } from "@/lib/audio/audio-manager";
 import { PixelButton } from "@/components/ui/pixel-button";
-import { PixelLabel } from "@/components/ui/pixel-label";
+import { PixelSwitch } from "@/components/ui/pixel-switch";
 import {
   PixelPanel,
   PixelPanelHeader,
@@ -55,38 +56,46 @@ export function SettingsBoard({ className }: { className?: string }) {
   }, [reducedMotion, scanlines]);
 
   return (
-    <div className={cn("grid gap-6 lg:grid-cols-2", className)}>
-      <PixelPanel tone="raised">
-        <PixelPanelHeader>
-          <PixelPanelTitle>Display</PixelPanelTitle>
+    <div className={cn("grid gap-5 lg:grid-cols-2 lg:gap-6", className)}>
+      <PixelPanel tone="raised" className="overflow-hidden">
+        <PixelPanelHeader className="bg-void/55">
+          <div className="flex items-center gap-2">
+            <Monitor className="size-3.5 text-gold" aria-hidden />
+            <PixelPanelTitle>Display</PixelPanelTitle>
+          </div>
         </PixelPanelHeader>
-        <div className="space-y-5 p-5">
-          <ToggleRow
+        <div className="space-y-6 p-5 sm:p-6">
+          <PixelSwitch
             label="Reduce motion"
             description="Softens hops, dice tumbles, and idle bobbing."
             checked={reducedMotion}
             onChange={setReducedMotion}
           />
-          <ToggleRow
+          <div className="h-px bg-edge" aria-hidden />
+          <PixelSwitch
             label="CRT scanlines"
-            description="Soft horizontal lines on boards and the page field."
+            description="Soft horizontal lines across the page field."
             checked={scanlines}
             onChange={setScanlines}
           />
-          <p className="text-xs text-muted">
+          <p className="border-2 border-edge bg-ink/60 px-3 py-3 text-xs leading-relaxed text-muted">
             Pixel fonts stay crisp either way. Colour theme stays on the
             phosphor cabinet palette.
           </p>
         </div>
       </PixelPanel>
 
-      <PixelPanel tone="gold">
-        <PixelPanelHeader>
-          <PixelPanelTitle>Sound</PixelPanelTitle>
+      <PixelPanel tone="gold" className="overflow-hidden">
+        <PixelPanelHeader className="bg-void/40">
+          <div className="flex items-center gap-2">
+            <Volume2 className="size-3.5 text-gold" aria-hidden />
+            <PixelPanelTitle>Sound</PixelPanelTitle>
+          </div>
         </PixelPanelHeader>
-        <div className="space-y-5 p-5">
+        <div className="space-y-6 p-5 sm:p-6">
           <AudioVolumeControls />
-          <ToggleRow
+          <div className="h-px bg-gold/20" aria-hidden />
+          <PixelSwitch
             label="Music autoplay"
             description="Start the loop automatically after unlock."
             checked={musicAutoplay}
@@ -99,43 +108,18 @@ export function SettingsBoard({ className }: { className?: string }) {
           <PixelButton
             type="button"
             variant="secondary"
-            size="sm"
+            size="md"
+            className="w-full justify-center sm:w-auto"
             onClick={() => {
               void unlockAudio();
               playSfx("dice_roll");
             }}
           >
+            <Dice5 className="size-3.5" aria-hidden />
             Test dice SFX
           </PixelButton>
         </div>
       </PixelPanel>
     </div>
-  );
-}
-
-function ToggleRow({
-  label,
-  description,
-  checked,
-  onChange,
-}: {
-  label: string;
-  description: string;
-  checked: boolean;
-  onChange: (next: boolean) => void;
-}) {
-  return (
-    <label className="flex cursor-pointer items-start justify-between gap-4">
-      <span>
-        <PixelLabel className="text-parchment">{label}</PixelLabel>
-        <span className="mt-1 block text-xs text-muted">{description}</span>
-      </span>
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(event) => onChange(event.target.checked)}
-        className="mt-1 size-4 accent-gold"
-      />
-    </label>
   );
 }

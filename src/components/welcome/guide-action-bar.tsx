@@ -1,17 +1,15 @@
+"use client";
+
+import { SignInButton } from "@/components/account/sign-in-button";
 import { PixelButtonLink } from "@/components/ui/pixel-button";
 import { cn } from "@/lib/utils";
 
-const GUIDE_ACTIONS = [
-  { label: "Deposit", href: "/wallet", variant: "primary" as const },
-  { label: "Enter lobby", href: "/lobby", variant: "secondary" as const },
-] as const;
-
 /**
- * Shared guide footer CTAs: exit to deposit or lobby.
+ * Shared guide footer CTAs.
  */
 export function GuideActionBar({
   className,
-  hint = "Deposit first if your balance is empty, then pick a room in the lobby.",
+  hint = "Sign in with your wallet, then pick a room in the lobby.",
 }: {
   className?: string;
   hint?: string;
@@ -19,23 +17,29 @@ export function GuideActionBar({
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 border-t border-edge pt-8 sm:flex-row sm:flex-wrap sm:items-center",
+        "flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center",
         className,
       )}
     >
-      {GUIDE_ACTIONS.map((cta) => (
-        <PixelButtonLink
-          key={cta.href}
-          href={cta.href}
+      <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+        <SignInButton
           size="lg"
-          variant={cta.variant}
+          variant="primary"
           className="w-full justify-center sm:w-auto"
         >
-          {cta.label}
+          Sign in
+        </SignInButton>
+        <PixelButtonLink
+          href="/lobby"
+          size="lg"
+          variant="secondary"
+          className="w-full justify-center sm:w-auto"
+        >
+          Enter lobby
         </PixelButtonLink>
-      ))}
+      </div>
       {hint ? (
-        <p className="w-full text-xs leading-relaxed text-faint sm:ml-1 sm:max-w-xs">
+        <p className="w-full text-xs leading-relaxed text-faint sm:ml-1 sm:max-w-sm">
           {hint}
         </p>
       ) : null}

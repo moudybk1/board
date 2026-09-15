@@ -7,9 +7,9 @@ import {
 } from "@/server/services/wallet-link.service";
 
 /**
- * POST /api/wallets/verify · confirm wallet ownership with a signature stub.
+ * POST /api/wallets/verify · confirm wallet ownership with EIP-191 signature.
  *
- * Body: `{ signature: string, walletId?: string, address?: string }`
+ * Body: `{ signature: string, walletId?: string, address?: string, message?: string }`
  */
 export async function POST(request: Request) {
   const { userId } = await resolveRequestUser(request);
@@ -40,6 +40,7 @@ export async function POST(request: Request) {
       signature: raw.signature as string,
       walletId: typeof raw.walletId === "string" ? raw.walletId : undefined,
       address: typeof raw.address === "string" ? raw.address : undefined,
+      message: typeof raw.message === "string" ? raw.message : undefined,
     });
     return NextResponse.json(result);
   } catch (error) {

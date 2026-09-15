@@ -165,12 +165,12 @@
   }
 
   /*
-    Page field (research-backed for premium arcade / CRT product UIs):
-    - Tinted near-black base (never flat pure black)
-    - One soft phosphor bloom for brand light
-    - Edge vignette for CRT cabinet depth
-    - Micro film grain instead of dotted grids (grids read cheap on marketing surfaces)
-    Depth stays behind content; scanlines remain opt-in on boards only.
+    Felt table under a CRT cabinet:
+    - Deep forest felt base (board-game table, not flat SaaS black)
+    - Soft diamond weave for table texture
+    - Phosphor mint bloom + teal corner light
+    - Strong vignette so the playfield feels inset in a cabinet
+    Depth stays behind content; scanlines remain opt-in.
   */
   body {
     position: relative;
@@ -182,45 +182,64 @@
     letter-spacing: 0.05em;
     -webkit-font-smoothing: none;
     -moz-osx-font-smoothing: unset;
-    background-color: var(--color-ink);
+    background-color: #07110c;
     background-image:
       radial-gradient(
-        ellipse 130% 100% at 50% 35%,
-        transparent 42%,
-        color-mix(in srgb, var(--color-void) 82%, transparent) 100%
+        ellipse 90% 70% at 50% -10%,
+        color-mix(in srgb, var(--color-gold) 18%, transparent),
+        transparent 55%
       ),
       radial-gradient(
-        ellipse 55% 40% at 82% 6%,
-        color-mix(in srgb, var(--color-gold) 16%, transparent),
-        transparent 72%
+        ellipse 50% 45% at 100% 20%,
+        color-mix(in srgb, var(--color-monopoly) 10%, transparent),
+        transparent 62%
       ),
       radial-gradient(
-        ellipse 45% 35% at 8% 88%,
-        color-mix(in srgb, var(--color-monopoly) 6%, transparent),
-        transparent 70%
+        ellipse 45% 40% at 0% 85%,
+        color-mix(in srgb, var(--color-ludo) 7%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 120% 90% at 50% 55%,
+        transparent 35%,
+        color-mix(in srgb, var(--color-void) 78%, transparent) 100%
       ),
       linear-gradient(
-        165deg,
-        color-mix(in srgb, var(--color-surface) 55%, var(--color-ink)) 0%,
-        var(--color-ink) 38%,
-        var(--color-void) 100%
+        160deg,
+        #12241c 0%,
+        #0b1611 42%,
+        #060c09 100%
       );
     background-attachment: fixed;
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
   }
 
-  /* Film grain sits above the field, never blocks clicks. */
+  /* Felt weave + film grain — fixed, never blocks clicks. */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
     z-index: 80;
     pointer-events: none;
-    opacity: 0.04;
+    opacity: 0.55;
+    background-image:
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"),
+      repeating-linear-gradient(
+        45deg,
+        transparent 0 11px,
+        rgba(108, 255, 159, 0.018) 11px 12px
+      ),
+      repeating-linear-gradient(
+        -45deg,
+        transparent 0 11px,
+        rgba(0, 0, 0, 0.07) 11px 12px
+      );
+    background-size:
+      200px 200px,
+      24px 24px,
+      24px 24px;
     mix-blend-mode: soft-light;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
-    background-size: 180px 180px;
   }
 
   /* Soft CRT scanlines across the app; settings can turn them off. */
@@ -230,7 +249,7 @@
     inset: 0;
     z-index: 81;
     pointer-events: none;
-    opacity: 0.04;
+    opacity: 0.035;
     background-image: repeating-linear-gradient(
       to bottom,
       transparent 0 3px,
@@ -350,7 +369,10 @@
   line-height: 1.6;
 }
 
-/* Page sections inherit the CRT field; this adds a local phosphor pocket. */
+/*
+  Local playfield for product pages: inset felt stage with a phosphor rim
+  so content sits on a table, not a flat void.
+*/
 @utility board-atmosphere {
   position: relative;
   isolation: isolate;
@@ -362,16 +384,42 @@
     pointer-events: none;
     background:
       radial-gradient(
-        ellipse 65% 48% at 88% 12%,
-        color-mix(in srgb, var(--color-gold) 12%, transparent),
-        transparent 68%
+        ellipse 70% 42% at 50% 0%,
+        color-mix(in srgb, var(--color-gold) 16%, transparent),
+        transparent 62%
       ),
       radial-gradient(
-        ellipse 80% 60% at 50% 100%,
-        color-mix(in srgb, var(--color-void) 55%, transparent),
-        transparent 70%
+        ellipse 55% 50% at 100% 40%,
+        color-mix(in srgb, var(--color-monopoly) 8%, transparent),
+        transparent 65%
+      ),
+      radial-gradient(
+        ellipse 90% 55% at 50% 100%,
+        color-mix(in srgb, var(--color-void) 70%, transparent),
+        transparent 72%
       );
   }
+}
+
+/* Double-bezel felt stage used under page content. */
+@utility felt-stage {
+  position: relative;
+  border: 2px solid color-mix(in srgb, var(--color-edge-bright) 80%, var(--color-gold) 20%);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-surface-raised) 55%, transparent) 0%,
+      color-mix(in srgb, var(--color-ink) 88%, transparent) 100%
+    ),
+    radial-gradient(
+      ellipse 80% 60% at 50% 0%,
+      color-mix(in srgb, var(--color-gold) 8%, transparent),
+      transparent 70%
+    );
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--color-void) 75%, transparent),
+    6px 6px 0 0 var(--color-void),
+    inset 0 1px 0 0 color-mix(in srgb, var(--color-gold) 18%, transparent);
 }
 
 @utility board-container {
