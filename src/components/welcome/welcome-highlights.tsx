@@ -14,8 +14,6 @@ const MODES = [
   {
     id: "monopoly",
     title: "Monopoly",
-    tag: "World Tour",
-    accent: "text-monopoly border-monopoly/50",
     body: "Buy cities, collect rent, bankrupt the table. Pawns hop the perimeter one tile at a time.",
     href: "/lobby",
     Demo: MonopolyDemo,
@@ -23,8 +21,6 @@ const MODES = [
   {
     id: "ludo",
     title: "Ludo",
-    tag: "Four colours",
-    accent: "text-ludo border-ludo/50",
     body: "Roll a 6 to leave the yard. Capture rivals, stack blockades, race every pawn home.",
     href: "/lobby",
     Demo: LudoDemo,
@@ -91,7 +87,7 @@ export function WelcomeHighlights({ className }: { className?: string }) {
               )}
             >
               <div className="relative mx-auto w-full max-w-sm lg:max-w-md">
-                <div className="relative overflow-visible rounded-none border-2 border-edge-bright bg-void/50 p-4 shadow-pixel-lg pixel-inset sm:p-5">
+                <div className="relative overflow-hidden border-2 border-edge-bright bg-void/50 p-4 shadow-pixel-lg sm:p-5">
                   <div
                     aria-hidden
                     className={cn(
@@ -101,14 +97,6 @@ export function WelcomeHighlights({ className }: { className?: string }) {
                   />
                   <mode.Demo className="relative z-[1]" />
                 </div>
-                <span
-                  className={cn(
-                    "absolute -bottom-3 left-6 z-10 border-2 bg-ink px-3 py-1 font-pixel text-[9px] uppercase shadow-pixel-sm",
-                    mode.accent,
-                  )}
-                >
-                  {mode.tag}
-                </span>
               </div>
 
               <div className="max-w-md">

@@ -4,7 +4,17 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 
 import { PixelArt } from "@/components/game/pixel-art";
+import { LudoBoard } from "@/components/room/ludo-board";
+import type { DieValue } from "@/lib/game/dice";
+import { cellCenter, pawnPoint } from "@/lib/game/ludo-geometry";
+import {
+  findCaptures,
+  previewMove,
+  sendHome,
+  type MovePreview,
+} from "@/lib/game/ludo-rules";
 import { pawnSprite } from "@/lib/game/pawn-sprite";
+import type { LudoPawn, LudoRoomState } from "@/lib/mock/ludo";
 import { prefersReducedMotion } from "@/lib/motion/gsap-config";
 import { cn } from "@/lib/utils";
 
@@ -250,7 +260,9 @@ export function MonopolyDemo({ className }: { className?: string }) {
 }
 
 /**
- * Flat 2D Ludo board — continuous smooth race around the cross.
+ * Flat 2D Ludo board demo — real geometry + classic rules:
+ * need a 6 to leave the yard, hop the shared track, capture on unsafe cells,
+ * exact count into home / finish.
  */
 export function LudoDemo({ className }: { className?: string }) {
   const root = useRef<HTMLDivElement>(null);
@@ -259,214 +271,342 @@ export function LudoDemo({ className }: { className?: string }) {
     const node = root.current;
     if (!node || prefersReducedMotion()) return;
 
-    const racer = node.querySelector<HTMLElement>("[data-lud-racer]");
-    const idle = Array.from(
-      node.querySelectorAll<HTMLElement>("[data-lud-idle]"),
-    );
-    const pads = Array.from(
-      node.querySelectorAll<HTMLElement>("[data-lud-pad]"),
-    );
-    const sparks = Array.from(
-      node.querySelectorAll<HTMLElement>("[data-lud-spark]"),
-    );
-    const home = node.querySelector<HTMLElement>("[data-lud-home]");
-    const cleanups: Array<() => void> = [];
-    const loop = ludoLoopPoints();
+    const die = node.querySelector<HTMLElement>("[data-lud-die]");
+    const pawnEls = new Map<string, HTMLElement>();
+    node.querySelectorAll<HTMLElement>("[data-lud-pawn]").forEach((el) => {
+      const id = el.dataset.ludPawn;
+      if (id) pawnEls.set(id, el);
+    });
 
-    idle.forEach((pawn, i) => {
-      const bob = gsap.to(pawn, {
-        y: -5,
-        duration: 0.9 + i * 0.12,
+    let state = createDemoState();
+    const bobByEl = new Map<HTMLElement, gsap.core.Tween>();
+    const master = gsap.timeline({ repeat: -1, repeatDelay: 1.1 });
+
+    const stopBob = (el: HTMLElement) => {
+      bobByEl.get(el)?.kill();
+      bobByEl.delete(el);
+      gsap.set(el, { y: 0 });
+    };
+
+    const startBob = (el: HTMLElement) => {
+      stopBob(el);
+      const bob = gsap.to(el, {
+        y: -3,
+        duration: 1.15,
         yoyo: true,
         repeat: -1,
         ease: "sine.inOut",
-        delay: i * 0.2,
+        delay: Math.random() * 0.5,
       });
-      cleanups.push(() => bob.kill());
-    });
+      bobByEl.set(el, bob);
+    };
 
-    pads.forEach((pad, i) => {
-      const pulse = gsap.to(pad, {
-        opacity: 0.55,
-        duration: 1.1,
-        yoyo: true,
-        repeat: -1,
-        ease: "sine.inOut",
-        delay: i * 0.22,
+    const placeAll = () => {
+      for (const player of state.players) {
+        for (const pawn of player.pawns) {
+          const el = pawnEls.get(pawn.id);
+          const point = pawnPoint(player.position, pawn);
+          if (!el || !point) continue;
+          gsap.set(el, {
+            left: `${point.x}%`,
+            top: `${point.y}%`,
+            xPercent: -50,
+            yPercent: -50,
+            y: 0,
+            scale: 1,
+            scaleX: 1,
+            scaleY: 1,
+            opacity: pawn.status === "finished" ? 0.55 : 1,
+          });
+          startBob(el);
+        }
+      }
+    };
+
+    placeAll();
+
+    const setDie = (value: DieValue) => {
+      if (!die) return;
+      master.to(die, {
+        keyframes: [
+          { x: -3, rotation: -12, duration: 0.05 },
+          { x: 4, rotation: 10, duration: 0.05 },
+          { x: -4, rotation: -14, duration: 0.05 },
+          { x: 3, rotation: 8, duration: 0.05 },
+          { x: 0, rotation: 0, duration: 0.07 },
+        ],
+        ease: "power1.inOut",
+        onUpdate: () => {
+          die.textContent = DIE_FACES[Math.floor(Math.random() * 6)];
+        },
       });
-      cleanups.push(() => pulse.kill());
-    });
-
-    if (racer) {
-      gsap.set(racer, {
-        left: `${loop[0].x}%`,
-        top: `${loop[0].y}%`,
-        xPercent: -50,
-        yPercent: -50,
-        opacity: 1,
-        force3D: true,
+      master.add(() => {
+        die.textContent = DIE_FACES[value - 1];
       });
-
-      const race = gsap.timeline({ repeat: -1, repeatDelay: 0.55 });
-
-      race.to(racer, {
-        scale: 1.12,
-        duration: 0.22,
+      master.to(die, {
+        scale: 1.16,
+        duration: 0.14,
         yoyo: true,
         repeat: 1,
         ease: "power2.out",
       });
+    };
 
-      for (let i = 1; i < loop.length; i += 1) {
-        const spark = sparks[i % sparks.length];
-        const next = loop[i];
-
-        race.to(racer, {
-          left: `${next.x}%`,
-          top: `${next.y}%`,
+    const hopPath = (el: HTMLElement, path: [number, number][]) => {
+      for (const [row, col] of path) {
+        const point = cellCenter(row, col);
+        master.to(el, {
+          left: `${point.x}%`,
+          top: `${point.y}%`,
           duration: 0.15,
-          ease: "sine.inOut",
+          ease: "power2.inOut",
         });
-        race.to(
-          racer,
+        master.to(
+          el,
           {
-            y: -8,
+            y: -7,
+            scaleY: 1.08,
+            scaleX: 0.94,
             duration: 0.075,
-            ease: "power2.out",
             yoyo: true,
             repeat: 1,
+            ease: "power2.out",
           },
           "<",
         );
-
-        if (spark && i % 2 === 0) {
-          race.fromTo(
-            spark,
-            {
-              left: `${next.x}%`,
-              top: `${next.y}%`,
-              opacity: 0.9,
-              scale: 0.6,
-            },
-            {
-              opacity: 0,
-              scale: 1.8,
-              duration: 0.45,
-              ease: "power2.out",
-            },
-            "<0.02",
-          );
-        }
       }
+    };
 
-      if (home) {
-        race.to(home, {
-          scale: 1.14,
-          borderColor: "rgba(255,122,89,0.95)",
-          duration: 0.22,
+    const attempt = (seat: number, roll: DieValue, pawnId: string) => {
+      setDie(roll);
+      master.to({}, { duration: 0.12 });
+
+      const player = state.players.find((p) => p.position === seat);
+      const pawn = player?.pawns.find((p) => p.id === pawnId);
+      const el = pawnEls.get(pawnId);
+      if (!player || !pawn || !el) return;
+
+      // Resolve against current scripted state NOW so later beats see the result.
+      const move = previewMove(state, seat, pawn, roll);
+      if (!move) {
+        master.add(() => stopBob(el));
+        master.to(el, {
+          x: 4,
+          duration: 0.06,
           yoyo: true,
           repeat: 3,
-          ease: "power2.inOut",
+          ease: "power1.inOut",
         });
+        master.set(el, { x: 0 });
+        master.add(() => startBob(el));
+        master.to({}, { duration: 0.35 });
+        return;
       }
 
-      race.to(racer, {
-        opacity: 0,
-        scale: 0.85,
-        duration: 0.3,
-        ease: "power2.in",
-      });
-      race.set(racer, {
-        left: `${loop[0].x}%`,
-        top: `${loop[0].y}%`,
-        scale: 1,
-        opacity: 1,
-        y: 0,
-      });
+      const staged = patchPawn(state, seat, move.pawnId, move.next);
+      const captures = findCaptures(staged, seat, move.next);
+      state = applyDemoMove(state, seat, move);
 
-      cleanups.push(() => race.kill());
-    }
+      master.add(() => stopBob(el));
+      hopPath(el, move.path);
 
-    return () => cleanups.forEach((fn) => fn());
+      if (captures.length) {
+        master.add(() => {
+          for (const cap of captures) {
+            const victim = pawnEls.get(cap.victimPawnId);
+            const victimPawn = state.players
+              .find((p) => p.position === cap.victimSeat)
+              ?.pawns.find((p) => p.id === cap.victimPawnId);
+            if (!victim || !victimPawn) continue;
+            const pad = pawnPoint(cap.victimSeat, victimPawn);
+            if (!pad) continue;
+            stopBob(victim);
+            gsap.to(victim, {
+              left: `${pad.x}%`,
+              top: `${pad.y}%`,
+              y: 0,
+              duration: 0.45,
+              ease: "power2.inOut",
+              onComplete: () => startBob(victim),
+            });
+          }
+        });
+        master.to({}, { duration: 0.45 });
+      } else {
+        master.to({}, { duration: 0.28 });
+      }
+
+      master.add(() => startBob(el));
+    };
+
+    const jumpPawn = (seat: number, pawnId: string, next: LudoPawn) => {
+      state = patchPawn(state, seat, pawnId, next);
+      const point = pawnPoint(seat, next);
+      master.add(() => {
+        const el = pawnEls.get(pawnId);
+        if (!el || !point) return;
+        stopBob(el);
+        gsap.set(el, {
+          left: `${point.x}%`,
+          top: `${point.y}%`,
+          opacity: next.status === "finished" ? 0.55 : 1,
+        });
+        startBob(el);
+      });
+    };
+
+    // --- Scripted rules showcase ---
+    master.add(() => {
+      state = createDemoState();
+      placeAll();
+    });
+
+    // 1. Need a 6 to leave the yard
+    attempt(1, 3, "p1-0");
+
+    // 2. Exit on 6
+    attempt(1, 6, "p1-0");
+
+    // 3. Advance on the shared track
+    attempt(1, 5, "p1-0");
+
+    // 4–5. Opponent enters and parks on a cell seat 1 will hit
+    attempt(2, 6, "p2-0");
+    attempt(2, 6, "p2-0");
+
+    // 6–8. Seat 1 marches to the shared cell and captures
+    attempt(1, 6, "p1-0");
+    attempt(1, 5, "p1-0");
+    attempt(1, 4, "p1-0"); // lands on seat 2 → capture
+
+    // 9. Exact home finish (jump near door, then legal rolls)
+    jumpPawn(1, "p1-0", { id: "p1-0", index: 0, status: "home", steps: 3 });
+    master.to({}, { duration: 0.25 });
+    attempt(1, 2, "p1-0"); // 3 + 2 = 5 → finished
+
+    master.to({}, { duration: 0.9 });
+
+    return () => {
+      master.kill();
+      bobByEl.forEach((tween) => tween.kill());
+      bobByEl.clear();
+      pawnEls.forEach((el) => gsap.killTweensOf(el));
+      if (die) gsap.killTweensOf(die);
+    };
   }, []);
 
-  const yards = [
-    { x: 18, y: 82, seat: 1, tone: "bg-ludo/30 border-ludo/55" },
-    { x: 18, y: 18, seat: 2, tone: "bg-monopoly/25 border-monopoly/50" },
-    { x: 82, y: 18, seat: 4, tone: "bg-gold/20 border-gold/50" },
-    { x: 82, y: 82, seat: 3, tone: "bg-danger/22 border-danger/50" },
-  ];
+  const pawns = ([1, 2, 3, 4] as const).flatMap((seat) =>
+    [0, 1, 2, 3].map((index) => ({
+      id: `p${seat}-${index}`,
+      seat,
+      index,
+    })),
+  );
 
   return (
     <div
       ref={root}
-      className={cn(
-        "relative aspect-square w-full overflow-hidden border-2 border-ludo/60 bg-ink shadow-pixel-lg",
-        className,
-      )}
+      className={cn("relative aspect-square w-full", className)}
       aria-hidden
     >
-      <div className="absolute inset-x-[38%] inset-y-0 bg-surface" />
-      <div className="absolute inset-x-0 inset-y-[38%] bg-surface" />
-      <div
-        data-lud-home
-        className="absolute left-1/2 top-1/2 size-[16%] -translate-x-1/2 -translate-y-1/2 border-2 border-ludo/60 bg-ink"
+      <LudoBoard
+        showYardBadges={false}
+        className="shadow-pixel-lg"
+        overlay={
+          <>
+            {pawns.map((pawn) => (
+              <div
+                key={pawn.id}
+                data-lud-pawn={pawn.id}
+                className="absolute z-20 w-[7.5%] will-change-transform drop-shadow-[1px_1px_0_rgba(0,0,0,0.65)]"
+                style={{ left: "50%", top: "50%" }}
+              >
+                <PixelArt sprite={pawnSprite(pawn.seat)} />
+              </div>
+            ))}
+            <div
+              data-lud-die
+              className="absolute bottom-[3%] left-1/2 z-30 -translate-x-1/2 border-2 border-edge-bright bg-ink px-2 py-1 font-pixel text-base text-parchment shadow-pixel-sm will-change-transform"
+            >
+              ⚄
+            </div>
+          </>
+        }
       />
-      <p className="absolute left-1/2 top-[46%] z-[1] -translate-x-1/2 font-pixel text-[clamp(8px,1.5vw,12px)] text-ludo text-shadow-pixel">
-        LUDO
-      </p>
-
-      {ludoLoopPoints()
-        .filter((_, i) => i % 2 === 0)
-        .map((dot, index) => (
-          <span
-            key={index}
-            className="absolute size-[3.5%] bg-ludo/25"
-            style={{
-              left: `${dot.x}%`,
-              top: `${dot.y}%`,
-              transform: "translate(-50%, -50%)",
-            }}
-          />
-        ))}
-
-      {Array.from({ length: 8 }).map((_, i) => (
-        <span
-          key={`spark-${i}`}
-          data-lud-spark
-          className="pointer-events-none absolute z-20 size-2 rounded-sm bg-gold opacity-0"
-          style={{ transform: "translate(-50%, -50%)" }}
-        />
-      ))}
-
-      {yards.map((yard) => (
-        <div
-          key={yard.seat}
-          data-lud-pad
-          className={cn("absolute size-[22%] border-2", yard.tone)}
-          style={{
-            left: `${yard.x}%`,
-            top: `${yard.y}%`,
-            transform: "translate(-50%, -50%)",
-          }}
-        >
-          <div
-            data-lud-idle
-            className="absolute left-1/2 top-1/2 w-[42%] -translate-x-1/2 -translate-y-1/2 will-change-transform"
-          >
-            <PixelArt sprite={pawnSprite(yard.seat)} />
-          </div>
-        </div>
-      ))}
-
-      <div
-        data-lud-racer
-        className="absolute z-30 w-[12%] will-change-transform drop-shadow-[2px_2px_0_rgba(0,0,0,0.75)]"
-      >
-        <PixelArt sprite={pawnSprite(1)} />
-      </div>
     </div>
   );
+}
+
+function createDemoState(): LudoRoomState {
+  return {
+    roomId: "demo",
+    entryFee: 0,
+    maxPlayers: 4,
+    activeSeat: 1,
+    turn: 1,
+    turnSecondsLeft: 30,
+    lastRoll: null,
+    players: ([1, 2, 3, 4] as const).map((seat) => ({
+      id: `s${seat}`,
+      username: `P${seat}`,
+      position: seat,
+      status: "alive" as const,
+      isYou: seat === 1,
+      pawns: [0, 1, 2, 3].map((index) => ({
+        id: `p${seat}-${index}`,
+        index,
+        status: "yard" as const,
+        steps: 0,
+      })),
+    })),
+    log: [],
+  };
+}
+
+function patchPawn(
+  state: LudoRoomState,
+  seat: number,
+  pawnId: string,
+  next: LudoPawn,
+): LudoRoomState {
+  return {
+    ...state,
+    players: state.players.map((player) =>
+      player.position !== seat
+        ? player
+        : {
+            ...player,
+            pawns: player.pawns.map((pawn) =>
+              pawn.id === pawnId ? next : pawn,
+            ),
+          },
+    ),
+  };
+}
+
+function applyDemoMove(
+  state: LudoRoomState,
+  seat: number,
+  move: MovePreview,
+): LudoRoomState {
+  let next = patchPawn(state, seat, move.pawnId, move.next);
+  const captures = findCaptures(next, seat, move.next);
+  for (const cap of captures) {
+    next = {
+      ...next,
+      players: next.players.map((player) =>
+        player.position !== cap.victimSeat
+          ? player
+          : {
+              ...player,
+              pawns: player.pawns.map((pawn) =>
+                pawn.id === cap.victimPawnId ? sendHome(pawn) : pawn,
+              ),
+            },
+      ),
+    };
+  }
+  return next;
 }
 
 function perimeterPoints(count: number) {
@@ -484,24 +624,4 @@ function perimeterPoints(count: number) {
     else points.push({ x: 100 - inset, y: inset + span * t });
   }
   return points;
-}
-
-/** Denser path for smoother Ludo travel. */
-function ludoLoopPoints() {
-  const pts: { x: number; y: number }[] = [];
-  const push = (x: number, y: number) => pts.push({ x, y });
-  const step = 3;
-
-  for (let y = 78; y >= 42; y -= step) push(42, y);
-  for (let x = 42; x >= 8; x -= step) push(x, 42);
-  for (let y = 42; y >= 8; y -= step) push(8, y);
-  for (let x = 8; x <= 42; x += step) push(x, 8);
-  for (let y = 8; y <= 42; y += step) push(42, y);
-  for (let x = 42; x <= 92; x += step) push(x, 42);
-  for (let y = 42; y <= 92; y += step) push(92, y);
-  for (let x = 92; x >= 58; x -= step) push(x, 92);
-  for (let y = 92; y >= 58; y -= step) push(58, y);
-  for (let x = 58; x >= 42; x -= step) push(x, 58);
-
-  return pts;
 }

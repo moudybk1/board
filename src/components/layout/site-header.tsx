@@ -28,12 +28,19 @@ export function SiteHeader({ className }: { className?: string }) {
         className,
       )}
     >
-      <div className="board-container flex h-14 items-center gap-3 sm:h-16 sm:gap-5">
-        <Link href="/" aria-label="BOARD home" className="min-w-0 shrink">
-          <BoardLogo className="text-[10px] sm:text-sm" />
+      <div className="board-container relative flex h-14 items-center sm:h-16">
+        <Link
+          href="/"
+          aria-label="BOARD home"
+          className="relative z-10 flex min-w-0 shrink items-center py-1"
+        >
+          <BoardLogo className="text-[11px] tracking-[0.12em] sm:text-sm" />
         </Link>
 
-        <nav className="ml-1 hidden items-center gap-0.5 lg:flex">
+        <nav
+          aria-label="Primary desktop"
+          className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 items-center gap-0.5 lg:flex"
+        >
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
@@ -45,7 +52,7 @@ export function SiteHeader({ className }: { className?: string }) {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+        <div className="relative z-10 ml-auto flex items-center gap-2 sm:gap-3">
           <AudioControlsPopover className="hidden sm:block" />
           <MusicToggle />
           <AudioMuteToggle />
@@ -69,7 +76,7 @@ export function SiteHeader({ className }: { className?: string }) {
 
       <nav
         aria-label="Primary"
-        className="flex gap-1 overflow-x-auto border-t border-edge px-3 py-2 lg:hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex justify-center gap-1 overflow-x-auto border-t border-edge px-3 py-2 lg:hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {NAV_LINKS.map((link) => (
           <Link

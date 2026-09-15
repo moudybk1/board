@@ -17,9 +17,12 @@ import { cn } from "@/lib/utils";
 export function LudoBoard({
   className,
   overlay,
+  showYardBadges = true,
 }: {
   className?: string;
   overlay?: React.ReactNode;
+  /** Seat glyph badges in each yard. Off for compact marketing demos. */
+  showYardBadges?: boolean;
 }) {
   return (
     <div
@@ -38,10 +41,11 @@ export function LudoBoard({
         <LudoCellView key={`${cell.row}-${cell.col}`} cell={cell} />
       ))}
 
-      {/* Yard identity badges · shape + colour, readable without pawns. */}
-      {([1, 2, 3, 4] as const).map((seat) => (
-        <YardBadge key={seat} seat={seat} />
-      ))}
+      {showYardBadges
+        ? ([1, 2, 3, 4] as const).map((seat) => (
+            <YardBadge key={seat} seat={seat} />
+          ))
+        : null}
 
       {overlay}
     </div>

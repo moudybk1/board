@@ -235,7 +235,7 @@ export function AppBootLoader() {
         className="pointer-events-none absolute inset-0 opacity-[0.35]"
         style={{
           backgroundImage:
-            "radial-gradient(ellipse at 50% 30%, rgba(108,255,159,0.08), transparent 55%), repeating-linear-gradient(45deg, transparent, transparent 6px, rgba(42,53,48,0.35) 6px, rgba(42,53,48,0.35) 7px)",
+            "radial-gradient(ellipse at 50% 30%, rgba(255,216,74,0.16), transparent 55%), radial-gradient(ellipse at 85% 70%, rgba(61,220,255,0.1), transparent 50%), radial-gradient(ellipse at 15% 80%, rgba(255,107,157,0.1), transparent 50%), repeating-linear-gradient(45deg, transparent, transparent 6px, rgba(58,143,191,0.28) 6px, rgba(58,143,191,0.28) 7px)",
         }}
       />
 

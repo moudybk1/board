@@ -30,7 +30,6 @@ export function HeroDice({ className }: { className?: string }) {
     const dieB = node.querySelector<HTMLElement>("[data-die='b']");
     const shadowA = node.querySelector<HTMLElement>("[data-shadow='a']");
     const shadowB = node.querySelector<HTMLElement>("[data-shadow='b']");
-    const burst = node.querySelector<HTMLElement>("[data-burst]");
     const callout = node.querySelector<HTMLElement>("[data-callout]");
     if (!dieA || !dieB) return;
 
@@ -112,10 +111,10 @@ export function HeroDice({ className }: { className?: string }) {
       .to(
         [dieA, dieB],
         {
-          y: (i) => (i === 0 ? -130 : -155),
-          x: (i) => (i === 0 ? -36 : 42),
+          y: (i) => (i === 0 ? -150 : -175),
+          x: (i) => (i === 0 ? -42 : 48),
           rotation: (i) => (i === 0 ? "+=520" : "-=600"),
-          scale: 1.28,
+          scale: 1.18,
           duration: 0.5,
           ease: "power2.out",
           stagger: 0.07,
@@ -204,7 +203,7 @@ export function HeroDice({ className }: { className?: string }) {
         "<",
       );
 
-    // Callout pop + burst
+    // Callout pop
     master.fromTo(
       callout,
       { scale: 0.4, opacity: 0, y: 8 },
@@ -216,17 +215,6 @@ export function HeroDice({ className }: { className?: string }) {
         ease: "back.out(2.4)",
       },
       "-=0.1",
-    );
-    master.fromTo(
-      burst,
-      { scale: 0.2, opacity: 0.7 },
-      {
-        scale: 1.6,
-        opacity: 0,
-        duration: 0.45,
-        ease: "power2.out",
-      },
-      "<",
     );
 
     // Doubles victory spin (or cheeky nudge)
@@ -258,7 +246,7 @@ export function HeroDice({ className }: { className?: string }) {
       cancelled = true;
       clearFlickers();
       master.kill();
-      gsap.killTweensOf([dieA, dieB, shadowA, shadowB, burst, callout]);
+      gsap.killTweensOf([dieA, dieB, shadowA, shadowB, callout]);
       void cancelled;
     };
   }, []);
@@ -271,12 +259,7 @@ export function HeroDice({ className }: { className?: string }) {
         className,
       )}
     >
-      <div
-        data-burst
-        className="pointer-events-none absolute left-1/2 top-[42%] size-40 -translate-x-1/2 -translate-y-1/2 border-4 border-gold opacity-0 sm:size-52"
-      />
-
-      <div className="relative flex items-end gap-5 pt-24 sm:gap-7 sm:pt-28 lg:gap-8 lg:pt-32">
+      <div className="relative flex items-end gap-6 pt-28 sm:gap-8 sm:pt-32 lg:gap-10 lg:pt-36">
         <HeroDieFace face={faces[0]} which="a" />
         <HeroDieFace face={faces[1]} which="b" />
       </div>
@@ -317,7 +300,7 @@ function HeroDieFace({
       />
       <div
         data-die={which}
-        className="pixel-corners relative grid size-24 grid-cols-3 grid-rows-3 gap-[6px] border-4 border-void bg-parchment p-2 shadow-pixel-lg sm:size-28 sm:gap-2 sm:p-2.5 lg:size-32 lg:gap-2.5 lg:border-[5px] lg:p-3"
+        className="pixel-corners relative grid size-32 grid-cols-3 grid-rows-3 gap-2 border-[5px] border-void bg-parchment p-2.5 shadow-pixel-lg sm:size-40 sm:gap-2.5 sm:border-[6px] sm:p-3 lg:size-52 lg:gap-3 lg:border-[7px] lg:p-3.5"
         style={{ transformOrigin: "50% 85%" }}
       >
         <span className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-white/40" />

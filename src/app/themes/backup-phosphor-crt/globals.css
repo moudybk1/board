@@ -3,36 +3,35 @@
 @import "tailwindcss";
 
 /* ==========================================================================
-   BOARD design system (candy arcade tabletop)
-   Warm ocean playfield + sunny yellow primary, sky cyan Monopoly, candy pink
-   Ludo. Happy / colorful without purple-gradient SaaS defaults.
-   Backup of the prior phosphor CRT theme:
-   src/app/themes/backup-phosphor-crt/globals.css
+   BOARD design system (phosphor arcade)
+   Charcoal CRT cabinet + one mint phosphor accent. Hard edges only.
+   Deliberately avoids midnight-navy + gold + violet (common AI gaming kit).
    ========================================================================== */
 @theme {
-  /* Surfaces: deep teal-ocean cabinet (cheerful, not charcoal gloom) */
-  --color-void: #071526;
-  --color-ink: #0c1f38;
-  --color-surface: #143352;
-  --color-surface-raised: #1c4268;
-  --color-surface-hover: #2a5a8a80;
+  /* Surfaces: green-black cabinet stack */
+  --color-void: #050706;
+  --color-ink: #0a0e0c;
+  --color-surface: #121816;
+  --color-surface-raised: #1a211e;
+  --color-surface-hover: #24302b80;
 
   /* Strokes */
-  --color-edge: #3a6a94;
-  --color-edge-bright: #5a8fbf;
+  --color-edge: #2a3530;
+  --color-edge-bright: #3d4d45;
 
-  /* Type — warm parchment for a sunny read */
-  --color-parchment: #fff6e8;
-  --color-muted: #b7cfe6;
-  --color-faint: #7a9bb8;
+  /* Type */
+  --color-parchment: #e6ebe7;
+  --color-muted: #8b978f;
+  --color-faint: #5c675f;
 
-  /* Accents: "gold" token = sunny lemon (keeps text-gold / bg-gold working) */
-  --color-gold: #ffd84a;
-  --color-gold-deep: #ff8c2a;
-  --color-monopoly: #3ddcff;
-  --color-ludo: #ff6b9d;
-  --color-danger: #ff5a6a;
-  --color-success: #5dff9f;
+  /* Accents: phosphor mint kept under the historical "gold" token name so
+     existing utility classes (text-gold, bg-gold) pick up the new brand color. */
+  --color-gold: #6cff9f;
+  --color-gold-deep: #2f9a5a;
+  --color-monopoly: #3ec9b0;
+  --color-ludo: #ff7a59;
+  --color-danger: #ff6b6b;
+  --color-success: #6cff9f;
 
   /* One pixel stack for the whole app (body, UI chrome, mono labels). */
   --font-pixel: "Press Start 2P", "Courier New", monospace;
@@ -161,14 +160,17 @@
   html {
     background-color: var(--color-void);
     color-scheme: dark;
+    /* Avoid iOS rubber-band revealing a white overscroll flash. */
     overscroll-behavior-y: none;
   }
 
   /*
-    Candy arcade playfield:
-    - Warm ocean base (party table, not CRT gloom)
-    - Lemon / cyan / pink corner blooms
-    - Soft vignette so content still sits on a table
+    Felt table under a CRT cabinet:
+    - Deep forest felt base (board-game table, not flat SaaS black)
+    - Soft diamond weave for table texture
+    - Phosphor mint bloom + teal corner light
+    - Strong vignette so the playfield feels inset in a cabinet
+    Depth stays behind content; scanlines remain opt-in.
   */
   body {
     position: relative;
@@ -180,63 +182,58 @@
     letter-spacing: 0.05em;
     -webkit-font-smoothing: none;
     -moz-osx-font-smoothing: unset;
-    background-color: #0a1c36;
+    background-color: #07110c;
     background-image:
       radial-gradient(
-        ellipse 95% 70% at 50% -12%,
-        color-mix(in srgb, var(--color-gold) 28%, transparent),
-        transparent 58%
-      ),
-      radial-gradient(
-        ellipse 55% 50% at 100% 15%,
-        color-mix(in srgb, var(--color-monopoly) 22%, transparent),
-        transparent 62%
-      ),
-      radial-gradient(
-        ellipse 50% 45% at 0% 80%,
-        color-mix(in srgb, var(--color-ludo) 18%, transparent),
-        transparent 60%
-      ),
-      radial-gradient(
-        ellipse 40% 35% at 80% 90%,
-        color-mix(in srgb, var(--color-success) 12%, transparent),
+        ellipse 90% 70% at 50% -10%,
+        color-mix(in srgb, var(--color-gold) 18%, transparent),
         transparent 55%
       ),
       radial-gradient(
+        ellipse 50% 45% at 100% 20%,
+        color-mix(in srgb, var(--color-monopoly) 10%, transparent),
+        transparent 62%
+      ),
+      radial-gradient(
+        ellipse 45% 40% at 0% 85%,
+        color-mix(in srgb, var(--color-ludo) 7%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(
         ellipse 120% 90% at 50% 55%,
-        transparent 32%,
-        color-mix(in srgb, var(--color-void) 72%, transparent) 100%
+        transparent 35%,
+        color-mix(in srgb, var(--color-void) 78%, transparent) 100%
       ),
       linear-gradient(
-        165deg,
-        #1a3a62 0%,
-        #102848 45%,
-        #0a1c36 100%
+        160deg,
+        #12241c 0%,
+        #0b1611 42%,
+        #060c09 100%
       );
     background-attachment: fixed;
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
   }
 
-  /* Soft weave + grain — lighter, more festive than CRT grit. */
+  /* Felt weave + film grain — fixed, never blocks clicks. */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
     z-index: 80;
     pointer-events: none;
-    opacity: 0.42;
+    opacity: 0.55;
     background-image:
       url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"),
       repeating-linear-gradient(
         45deg,
         transparent 0 11px,
-        rgba(255, 216, 74, 0.035) 11px 12px
+        rgba(108, 255, 159, 0.018) 11px 12px
       ),
       repeating-linear-gradient(
         -45deg,
         transparent 0 11px,
-        rgba(61, 220, 255, 0.028) 11px 12px
+        rgba(0, 0, 0, 0.07) 11px 12px
       );
     background-size:
       200px 200px,
@@ -245,18 +242,18 @@
     mix-blend-mode: soft-light;
   }
 
-  /* Soft scanlines kept subtle so color stays the hero. */
+  /* Soft CRT scanlines across the app; settings can turn them off. */
   body::after {
     content: "";
     position: fixed;
     inset: 0;
     z-index: 81;
     pointer-events: none;
-    opacity: 0.022;
+    opacity: 0.035;
     background-image: repeating-linear-gradient(
       to bottom,
       transparent 0 3px,
-      rgba(0, 0, 0, 0.45) 3px 4px
+      rgba(0, 0, 0, 0.55) 3px 4px
     );
   }
 
@@ -264,6 +261,7 @@
     display: none;
   }
 
+  /* Sprites and landmark art must stay crisp when scaled up. */
   img[data-pixel],
   canvas,
   [data-pixel] {
@@ -271,6 +269,7 @@
     image-rendering: crisp-edges;
   }
 
+  /* Pixel display faces should never soft-antialias into mush. */
   body,
   body *,
   .font-pixel,
@@ -286,11 +285,13 @@
     color: var(--color-void);
   }
 
+  /* Chunky square scrollbar to match the pixel frame language. */
   * {
     scrollbar-color: var(--color-edge-bright) var(--color-ink);
     scrollbar-width: thin;
   }
 
+  /* Honour the settings page reduced-motion preference in addition to OS. */
   html[data-reduced-motion="true"] *,
   html[data-reduced-motion="true"] *::before,
   html[data-reduced-motion="true"] *::after {
@@ -320,6 +321,8 @@
    Utilities
    -------------------------------------------------------------------------- */
 
+/* Notched corners: clips the four corner pixels so panels read as pixel art
+   frames rather than plain rectangles. */
 @utility pixel-corners {
   clip-path: polygon(
     0 4px,
@@ -337,6 +340,8 @@
   );
 }
 
+/* Faint horizontal scanlines - CRT texture that keeps large dark areas from
+   looking flat. Applied as an overlay so it never tints text. */
 @utility scanlines {
   position: relative;
   &::after {
@@ -347,7 +352,7 @@
     background-image: repeating-linear-gradient(
       to bottom,
       transparent 0 3px,
-      rgba(0, 0, 0, 0.12) 3px 4px
+      rgba(0, 0, 0, 0.14) 3px 4px
     );
   }
 }
@@ -358,10 +363,16 @@
 
 @utility font-pixel {
   font-family: var(--font-pixel);
+  /* Pixel faces have no true italics or sub-pixel metrics; letter-spacing
+     keeps the blocky glyphs from colliding. */
   letter-spacing: 0.06em;
   line-height: 1.6;
 }
 
+/*
+  Local playfield for product pages: inset felt stage with a phosphor rim
+  so content sits on a table, not a flat void.
+*/
 @utility board-atmosphere {
   position: relative;
   isolation: isolate;
@@ -374,50 +385,41 @@
     background:
       radial-gradient(
         ellipse 70% 42% at 50% 0%,
-        color-mix(in srgb, var(--color-gold) 22%, transparent),
+        color-mix(in srgb, var(--color-gold) 16%, transparent),
         transparent 62%
       ),
       radial-gradient(
         ellipse 55% 50% at 100% 40%,
-        color-mix(in srgb, var(--color-monopoly) 16%, transparent),
+        color-mix(in srgb, var(--color-monopoly) 8%, transparent),
         transparent 65%
       ),
       radial-gradient(
-        ellipse 45% 40% at 0% 70%,
-        color-mix(in srgb, var(--color-ludo) 12%, transparent),
-        transparent 60%
-      ),
-      radial-gradient(
         ellipse 90% 55% at 50% 100%,
-        color-mix(in srgb, var(--color-void) 65%, transparent),
+        color-mix(in srgb, var(--color-void) 70%, transparent),
         transparent 72%
       );
   }
 }
 
+/* Double-bezel felt stage used under page content. */
 @utility felt-stage {
   position: relative;
-  border: 2px solid color-mix(in srgb, var(--color-edge-bright) 70%, var(--color-gold) 30%);
+  border: 2px solid color-mix(in srgb, var(--color-edge-bright) 80%, var(--color-gold) 20%);
   background:
     linear-gradient(
       180deg,
-      color-mix(in srgb, var(--color-surface-raised) 60%, transparent) 0%,
-      color-mix(in srgb, var(--color-ink) 85%, transparent) 100%
+      color-mix(in srgb, var(--color-surface-raised) 55%, transparent) 0%,
+      color-mix(in srgb, var(--color-ink) 88%, transparent) 100%
     ),
     radial-gradient(
       ellipse 80% 60% at 50% 0%,
-      color-mix(in srgb, var(--color-gold) 14%, transparent),
+      color-mix(in srgb, var(--color-gold) 8%, transparent),
       transparent 70%
-    ),
-    radial-gradient(
-      ellipse 50% 40% at 100% 100%,
-      color-mix(in srgb, var(--color-monopoly) 10%, transparent),
-      transparent 65%
     );
   box-shadow:
-    0 0 0 4px color-mix(in srgb, var(--color-void) 70%, transparent),
+    0 0 0 4px color-mix(in srgb, var(--color-void) 75%, transparent),
     6px 6px 0 0 var(--color-void),
-    inset 0 1px 0 0 color-mix(in srgb, var(--color-gold) 28%, transparent);
+    inset 0 1px 0 0 color-mix(in srgb, var(--color-gold) 18%, transparent);
 }
 
 @utility board-container {
@@ -447,6 +449,7 @@
     inset -1px -1px 0 0 color-mix(in srgb, var(--color-edge-bright) 35%, transparent);
 }
 
+/* Fluid pixel display sizes that stay readable from phone → desktop. */
 @utility text-pixel-fluid-sm {
   font-size: var(--text-pixel-sm);
 }

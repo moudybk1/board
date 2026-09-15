@@ -10,7 +10,7 @@ export function BoardLogo({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-2.5 font-pixel text-base text-parchment",
+        "inline-flex items-center gap-2.5 font-pixel leading-none text-parchment",
         className,
       )}
       {...props}
@@ -19,13 +19,13 @@ export function BoardLogo({
       <img
         src="/board-logo.png"
         alt=""
-        width={28}
-        height={28}
+        width={36}
+        height={36}
         data-pixel
-        className="size-6 shrink-0 bg-transparent sm:size-7"
+        className="size-8 shrink-0 bg-transparent sm:size-9"
         draggable={false}
       />
-      BOARD
+      <span className="pt-0.5">BOARD</span>
     </span>
   );
 }
