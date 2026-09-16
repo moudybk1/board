@@ -21,15 +21,11 @@ export function AppBootLoader() {
   const [phase, setPhase] = useState<Phase>("loading");
   const [progress, setProgress] = useState(6);
   const [faces, setFaces] = useState<readonly [DieValue, DieValue]>([5, 3]);
-  const [mounted, setMounted] = useState(false);
   const startedAt = useRef(0);
 
+  // No mount guard: effects only run on the client, and `mounted` was never
+  // read during render, so the extra state was one wasted render pass.
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) return;
     startedAt.current = performance.now();
     const reduced = prefersReducedMotion();
     const node = root.current;
@@ -56,7 +52,9 @@ export function AppBootLoader() {
     if (!reduced) {
       progressTimer = window.setTimeout(tickProgress, 80);
     } else {
-      setProgress(92);
+      // Deferred rather than set inline: a synchronous setState in an effect
+      // body forces a second render pass before paint.
+      progressTimer = window.setTimeout(() => setProgress(92), 0);
     }
 
     if (node && !reduced) {
@@ -213,7 +211,7 @@ export function AppBootLoader() {
       delete document.documentElement.dataset.boardBoot;
       document.body.style.overflow = "";
     };
-  }, [mounted]);
+  }, []);
 
   if (phase === "gone") return null;
 

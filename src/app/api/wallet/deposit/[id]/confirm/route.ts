@@ -1,19 +1,24 @@
 import { NextResponse } from "next/server";
 
 import {
-  confirmDeposit,
-} from "@/server/services/deposit-confirm.service";
-import { DepositError } from "@/server/services/deposit.service";
+  errorResponse,
+  readJsonBody,
+  readOptionalBoolean,
+  readOptionalString,
+} from "@/server/lib/api-response";
+import { assertServiceSecret } from "@/server/lib/service-auth";
+import { confirmDeposit } from "@/server/services/deposit-confirm.service";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
 };
 
 /**
- * POST /api/wallet/deposit/[id]/confirm · mock chain listener hook.
+ * POST /api/wallet/deposit/[id]/confirm · chain-listener hook.
  *
- * Body (optional): `{ txHash?: string, fail?: boolean }`
- * Marks the pending deposit confirmed (credits balance) or failed.
+ * Credits the user's balance, so it is authenticated with the shared service
+ * secret rather than a player session. Body (optional):
+ * `{ txHash?: string, fail?: boolean }`
  */
 export async function POST(request: Request, context: RouteContext) {
   const { id } = await context.params;
@@ -21,34 +26,17 @@ export async function POST(request: Request, context: RouteContext) {
     return NextResponse.json({ error: "Missing deposit id." }, { status: 400 });
   }
 
-  let body: { txHash?: string; fail?: boolean } = {};
   try {
-    const raw = await request.json();
-    if (raw && typeof raw === "object") {
-      body = raw as { txHash?: string; fail?: boolean };
-    }
-  } catch {
-    // empty body is fine
-  }
+    assertServiceSecret(request);
+    const body = await readJsonBody(request);
 
-  try {
     const result = await confirmDeposit({
       transactionId: id,
-      txHash: typeof body.txHash === "string" ? body.txHash : undefined,
-      fail: Boolean(body.fail),
+      txHash: readOptionalString(body, "txHash"),
+      fail: readOptionalBoolean(body, "fail") ?? false,
     });
     return NextResponse.json(result);
   } catch (error) {
-    if (error instanceof DepositError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.status },
-      );
-    }
-    console.error(`[POST /api/wallet/deposit/${id}/confirm]`, error);
-    return NextResponse.json(
-      { error: "Failed to confirm deposit." },
-      { status: 500 },
-    );
+    return errorResponse(error, "POST /api/wallet/deposit/:id/confirm");
   }
 }

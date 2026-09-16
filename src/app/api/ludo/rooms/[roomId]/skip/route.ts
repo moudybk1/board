@@ -1,42 +1,24 @@
 import { NextResponse } from "next/server";
 
-import { MOCK_PLAYER } from "@/lib/mock/lobby";
+import { errorResponse, failureResponse } from "@/server/lib/api-response";
+import { requireUser } from "@/server/lib/require-user";
 import { skipLudoTurn } from "@/server/services/ludo-turn.service";
 
 type RouteContext = {
   params: Promise<{ roomId: string }>;
 };
 
-/**
- * POST /api/ludo/rooms/[roomId]/skip · skip the active seat's turn.
- */
+/** POST /api/ludo/rooms/[roomId]/skip · skip the active seat's turn. */
 export async function POST(request: Request, context: RouteContext) {
   const { roomId } = await context.params;
-  const userId =
-    request.headers.get("x-user-id")?.trim() || MOCK_PLAYER.id;
-
   if (!roomId) {
     return NextResponse.json({ error: "Missing room id." }, { status: 400 });
   }
 
   try {
+    const { userId } = await requireUser(request);
     const result = await skipLudoTurn(roomId, userId);
-
-    if (!result.ok) {
-      const status =
-        result.code === "NOT_FOUND"
-          ? 404
-          : result.code === "NOT_YOUR_TURN"
-            ? 403
-            : result.code === "USER_NOT_FOUND"
-              ? 401
-              : 409;
-
-      return NextResponse.json(
-        { error: result.message, code: result.code },
-        { status },
-      );
-    }
+    if (!result.ok) return failureResponse(result);
 
     return NextResponse.json({
       action: result.action,
@@ -45,10 +27,6 @@ export async function POST(request: Request, context: RouteContext) {
       source: result.source,
     });
   } catch (error) {
-    console.error("[POST /api/ludo/rooms/:roomId/skip]", error);
-    return NextResponse.json(
-      { error: "Failed to skip turn." },
-      { status: 500 },
-    );
+    return errorResponse(error, "POST /api/ludo/rooms/:roomId/skip");
   }
 }

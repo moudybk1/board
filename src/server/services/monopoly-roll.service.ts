@@ -1,6 +1,7 @@
 import { asc, eq } from "drizzle-orm";
 
-import { rollDice, type DiceRoll } from "@/lib/game/dice";
+import { type DiceRoll } from "@/lib/game/dice";
+import { secureRollDice } from "@/server/lib/secure-dice";
 import { BOARD_TILE_COUNT, BOARD_TILES } from "@/lib/game/monopoly-board";
 import {
   getMonopolyRoom,
@@ -13,13 +14,17 @@ import {
   monopolyMatches,
   monopolyPlayers,
   monopolyProperties,
-  rooms,
   users,
 } from "@/server/db/schema";
 import { MOCK_MONOPOLY_LIVE } from "@/server/services/join-room.service";
 import { MONOPOLY_TURN_SECONDS } from "@/server/services/monopoly-start.service";
 import { broadcastMonopolyAction } from "@/server/services/monopoly-sync.service";
 import { settleMonopolyRent } from "@/server/services/monopoly-rent.service";
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
+import {
+  findRoomByRef,
+  formatRoomCode,
+} from "@/server/db/repositories/rooms.repository";
 
 export type MonopolyRollResult =
   | {
@@ -54,10 +59,6 @@ export type MonopolyRollResult =
       message: string;
     };
 
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
-
 /**
  * Authoritative Monopoly roll: move the active seat's pawn, append log lines,
  * broadcast to SSE subscribers. Buy / rent settlement are separate endpoints.
@@ -73,12 +74,7 @@ export async function rollMonopoly(
   const db = getDb();
 
   const result = await db.transaction(async (tx) => {
-    const roomRows = await tx.select().from(rooms);
-    const room = roomRows.find(
-      (row) =>
-        row.id === roomRef ||
-        formatRoomCode(row.id, row.gameType) === roomRef.toUpperCase(),
-    );
+    const room = await findRoomByRef(tx, roomRef);
 
     if (!room || room.gameType !== "monopoly") {
       return {
@@ -166,7 +162,7 @@ export async function rollMonopoly(
       };
     }
 
-    const diceResult = rollDice();
+    const diceResult = secureRollDice();
     const fromTile = roller.tile;
     const toTile = (fromTile + diceResult.total) % BOARD_TILE_COUNT;
     const tile = BOARD_TILES[toTile];
@@ -385,7 +381,7 @@ async function rollMonopolyMock(
     };
   }
 
-  const diceResult = rollDice();
+  const diceResult = secureRollDice();
   const fromTile = roller.tile;
   const toTile = (fromTile + diceResult.total) % BOARD_TILE_COUNT;
   const tile = BOARD_TILES[toTile];
@@ -503,8 +499,3 @@ async function rollMonopolyMock(
   };
 }
 
-function formatRoomCode(id: string, gameType: "monopoly" | "ludo") {
-  const prefix = gameType === "monopoly" ? "MNP" : "LUD";
-  const short = id.replace(/-/g, "").slice(0, 4).toUpperCase();
-  return `${prefix}-${short}`;
-}

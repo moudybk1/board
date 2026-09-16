@@ -1,60 +1,62 @@
 import { NextResponse } from "next/server";
 
-import { MOCK_PLAYER } from "@/lib/mock/lobby";
+import { errorResponse } from "@/server/lib/api-response";
+import { requireUser } from "@/server/lib/require-user";
 import { listUserTransactions } from "@/server/services/transactions.service";
 
+const TYPES = ["deposit", "withdraw", "entry_fee", "payout", "fee"] as const;
+const STATUSES = ["pending", "confirmed", "failed"] as const;
+
+type TransactionType = (typeof TYPES)[number];
+type TransactionStatus = (typeof STATUSES)[number];
+
+/** Narrow a query-string value to one of the allowed literals. */
+function readFilter<T extends string>(
+  raw: string | null,
+  allowed: readonly T[],
+): { ok: true; value: T | undefined } | { ok: false } {
+  if (raw === null) return { ok: true, value: undefined };
+  const match = allowed.find((option) => option === raw);
+  return match ? { ok: true, value: match } : { ok: false };
+}
+
 /**
- * GET /api/wallet/transactions · current user's ledger, newest first.
+ * GET /api/wallet/transactions · the signed-in user's ledger, newest first.
  *
- * Query:
- * - `type`    deposit | withdraw | entry_fee | payout | fee
- * - `status`  pending | confirmed | failed
- * Header: `x-user-id` (falls back to mock player).
+ * Query: `type` (deposit|withdraw|entry_fee|payout|fee), `status`
+ * (pending|confirmed|failed).
  */
 export async function GET(request: Request) {
-  const userId =
-    request.headers.get("x-user-id")?.trim() || MOCK_PLAYER.id;
   const url = new URL(request.url);
-  const type = url.searchParams.get("type") ?? undefined;
-  const status = url.searchParams.get("status") ?? undefined;
 
-  if (
-    type &&
-    type !== "deposit" &&
-    type !== "withdraw" &&
-    type !== "entry_fee" &&
-    type !== "payout" &&
-    type !== "fee"
-  ) {
+  const type = readFilter<TransactionType>(url.searchParams.get("type"), TYPES);
+  if (!type.ok) {
     return NextResponse.json(
-      {
-        error:
-          "Invalid type. Use deposit, withdraw, entry_fee, payout, or fee.",
-      },
+      { error: `Invalid type. Use ${TYPES.join(", ")}.` },
       { status: 400 },
     );
   }
 
-  if (
-    status &&
-    status !== "pending" &&
-    status !== "confirmed" &&
-    status !== "failed"
-  ) {
+  const status = readFilter<TransactionStatus>(
+    url.searchParams.get("status"),
+    STATUSES,
+  );
+  if (!status.ok) {
     return NextResponse.json(
-      { error: "Invalid status. Use pending, confirmed, or failed." },
+      { error: `Invalid status. Use ${STATUSES.join(", ")}.` },
       { status: 400 },
     );
   }
 
   try {
-    const result = await listUserTransactions({ userId, type, status });
+    const { userId } = await requireUser(request);
+    const result = await listUserTransactions({
+      userId,
+      type: type.value,
+      status: status.value,
+    });
     return NextResponse.json(result);
   } catch (error) {
-    console.error("[GET /api/wallet/transactions]", error);
-    return NextResponse.json(
-      { error: "Failed to list transactions." },
-      { status: 500 },
-    );
+    return errorResponse(error, "GET /api/wallet/transactions");
   }
 }

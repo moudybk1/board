@@ -1,9 +1,6 @@
 import { getUserBalance } from "@/server/services/balance.service";
 import { getRoomEconomyConfig } from "@/server/services/economy.service";
-
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
 
 export type NetworkStatus = {
   chain: string;

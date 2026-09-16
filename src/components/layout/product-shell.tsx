@@ -1,3 +1,4 @@
+import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { PageReveal } from "@/components/layout/page-reveal";
 import { cn } from "@/lib/utils";
@@ -50,6 +51,7 @@ export function ProductShell({
           </PageReveal>
         </div>
       </main>
+      <SiteFooter />
     </div>
   );
 }

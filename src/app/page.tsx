@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { OnboardingPath } from "@/components/welcome/onboarding-path";
 import { TokenRoadmapSection } from "@/components/welcome/token-roadmap-section";
@@ -32,6 +33,7 @@ export default function Home() {
         <OnboardingPath />
         <TokenRoadmapSection />
       </main>
+      <SiteFooter />
     </div>
   );
 }

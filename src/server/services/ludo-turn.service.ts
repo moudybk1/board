@@ -9,7 +9,6 @@ import {
   ludoPawns,
   ludoPlayers,
   matches,
-  rooms,
   users,
 } from "@/server/db/schema";
 import { publishLudo } from "@/server/realtime/ludo-hub";
@@ -19,6 +18,11 @@ import {
   LUDO_TURN_SECONDS,
   buildLudoState,
 } from "@/server/services/ludo-start.service";
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
+import {
+  findRoomByRef,
+  formatRoomCode,
+} from "@/server/db/repositories/rooms.repository";
 
 export type LudoTurnResult =
   | {
@@ -38,10 +42,6 @@ export type LudoTurnResult =
         | "ALREADY_LEFT";
       message: string;
     };
-
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
 
 /**
  * Skip the active seat's turn (no legal move / timeout). Clears lastRoll and
@@ -396,13 +396,7 @@ type DbTx = Parameters<
 >[0];
 
 async function loadMatch(tx: DbTx, roomRef: string) {
-  const roomRows = await tx.select().from(rooms);
-  const room = roomRows.find(
-    (row: { id: string; gameType: string }) =>
-      row.id === roomRef ||
-      formatRoomCode(row.id, row.gameType as "monopoly" | "ludo") ===
-        roomRef.toUpperCase(),
-  );
+  const room = await findRoomByRef(tx, roomRef);
   if (!room || room.gameType !== "ludo") {
     return {
       ok: false as const,
@@ -599,8 +593,3 @@ async function rebuildState(
   });
 }
 
-function formatRoomCode(id: string, gameType: "monopoly" | "ludo") {
-  const prefix = gameType === "monopoly" ? "MNP" : "LUD";
-  const short = id.replace(/-/g, "").slice(0, 4).toUpperCase();
-  return `${prefix}-${short}`;
-}

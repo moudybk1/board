@@ -17,6 +17,10 @@ import {
   cn,
 } from "@/lib/utils";
 import { shortenAddress } from "@/lib/wallet/chains";
+import { fetchJson } from "@/lib/fetch-json";
+
+/** Recent wins shown in the profile dropdown. */
+const RECENT_WINS_SHOWN = 4;
 
 type RecentWin = {
   id: string;
@@ -42,6 +46,7 @@ export function ProfileMenu({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
   const [wins, setWins] = useState<RecentWin[]>([]);
   const [winsLoading, setWinsLoading] = useState(false);
+  const [winsLoadedAt, setWinsLoadedAt] = useState(0);
   const [signingOut, setSigningOut] = useState(false);
 
   const address = wallet?.address;
@@ -67,20 +72,29 @@ export function ProfileMenu({ className }: { className?: string }) {
 
   useEffect(() => {
     if (!open) return;
+
+    // Every state write happens in the async continuation, so the effect body
+    // itself never calls setState.
     let cancelled = false;
-    setWinsLoading(true);
+
     void (async () => {
+      if (cancelled) return;
+      setWinsLoading(true);
       try {
-        const res = await fetch("/api/wins", { credentials: "include" });
-        if (!res.ok) throw new Error("wins");
-        const json = (await res.json()) as { wins?: RecentWin[] };
-        if (!cancelled) setWins((json.wins ?? []).slice(0, 4));
+        const json = await fetchJson<{ wins?: RecentWin[] }>("/api/wins");
+        if (!cancelled) setWins((json.wins ?? []).slice(0, RECENT_WINS_SHOWN));
       } catch {
         if (!cancelled) setWins([]);
       } finally {
-        if (!cancelled) setWinsLoading(false);
+        if (!cancelled) {
+          // Freeze "now" at load time: reading Date.now() while rendering the
+          // list makes the render impure.
+          setWinsLoadedAt(Date.now());
+          setWinsLoading(false);
+        }
       }
     })();
+
     return () => {
       cancelled = true;
     };
@@ -204,7 +218,7 @@ export function ProfileMenu({ className }: { className?: string }) {
                         {win.gameType}
                       </span>
                       <span className="mt-1 block font-pixel text-[7px] uppercase text-faint">
-                        {formatAge(win.settledAt, Date.now())}
+                        {formatAge(win.settledAt, winsLoadedAt)}
                       </span>
                     </span>
                     <span className="shrink-0 font-pixel text-[9px] text-gold">

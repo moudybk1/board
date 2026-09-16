@@ -16,6 +16,7 @@ import {
 import { pawnSprite } from "@/lib/game/pawn-sprite";
 import type { LudoPawn, LudoRoomState } from "@/lib/mock/ludo";
 import { prefersReducedMotion } from "@/lib/motion/gsap-config";
+import { playWhileVisible } from "@/lib/motion/play-while-visible";
 import { cn } from "@/lib/utils";
 
 const DIE_FACES = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"] as const;
@@ -202,7 +203,10 @@ export function MonopolyDemo({ className }: { className?: string }) {
       clearCellGlow();
     });
 
+    const stopVisibilityGate = playWhileVisible(node, () => [master]);
+
     return () => {
+      stopVisibilityGate();
       cancelled = true;
       master.kill();
       clearCellGlow();
@@ -486,7 +490,13 @@ export function LudoDemo({ className }: { className?: string }) {
 
     master.to({}, { duration: 0.9 });
 
+    const stopVisibilityGate = playWhileVisible(node, () => [
+      master,
+      ...bobByEl.values(),
+    ]);
+
     return () => {
+      stopVisibilityGate();
       master.kill();
       bobByEl.forEach((tween) => tween.kill());
       bobByEl.clear();

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { errorResponse, failureResponse } from "@/server/lib/api-response";
+import { requireUser } from "@/server/lib/require-user";
 import { settleMonopolyWinner } from "@/server/services/monopoly-settle.service";
 
 type RouteContext = {
@@ -9,31 +11,19 @@ type RouteContext = {
 /**
  * POST /api/monopoly/rooms/[roomId]/settle · declare winner & pay net prize.
  *
- * Requires exactly one living player. Applies the 2% fee, credits the winner's
- * platform BOARD balance, and marks the match settled.
+ * Requires exactly one living player, and a caller seated in that match.
+ * Applies the fee, credits the winner, and marks the match settled.
  */
-export async function POST(_request: Request, context: RouteContext) {
+export async function POST(request: Request, context: RouteContext) {
   const { roomId } = await context.params;
   if (!roomId) {
     return NextResponse.json({ error: "Missing room id." }, { status: 400 });
   }
 
   try {
-    const result = await settleMonopolyWinner(roomId);
-
-    if (!result.ok) {
-      const status =
-        result.code === "NOT_FOUND"
-          ? 404
-          : result.code === "ALREADY_SETTLED"
-            ? 409
-            : 409;
-
-      return NextResponse.json(
-        { error: result.message, code: result.code },
-        { status },
-      );
-    }
+    const { userId } = await requireUser(request);
+    const result = await settleMonopolyWinner(roomId, userId);
+    if (!result.ok) return failureResponse(result);
 
     return NextResponse.json({
       winnerUserId: result.winnerUserId,
@@ -47,10 +37,6 @@ export async function POST(_request: Request, context: RouteContext) {
       source: result.source,
     });
   } catch (error) {
-    console.error("[POST /api/monopoly/rooms/:roomId/settle]", error);
-    return NextResponse.json(
-      { error: "Failed to settle Monopoly match." },
-      { status: 500 },
-    );
+    return errorResponse(error, "POST /api/monopoly/rooms/:roomId/settle");
   }
 }

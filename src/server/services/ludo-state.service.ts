@@ -11,15 +11,15 @@ import {
   ludoPawns,
   ludoPlayers,
   matches,
-  rooms,
   users,
 } from "@/server/db/schema";
 import { MOCK_LUDO_LIVE } from "@/server/services/join-room.service";
 import { buildLudoState } from "@/server/services/ludo-start.service";
-
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
+import {
+  findRoomByRef,
+  formatRoomCode,
+} from "@/server/db/repositories/rooms.repository";
 
 /**
  * Resolve the live Ludo board for a lobby room code (or UUID).
@@ -39,12 +39,7 @@ export async function getLudoState(
   }
 
   const db = getDb();
-  const roomRows = await db.select().from(rooms);
-  const room = roomRows.find(
-    (row) =>
-      row.id === roomRef ||
-      formatRoomCode(row.id, row.gameType) === key,
-  );
+  const room = await findRoomByRef(db, roomRef);
 
   if (!room || room.gameType !== "ludo") return null;
 
@@ -140,8 +135,3 @@ export async function getLudoState(
   return { state, source: "database" };
 }
 
-function formatRoomCode(id: string, gameType: "monopoly" | "ludo") {
-  const prefix = gameType === "monopoly" ? "MNP" : "LUD";
-  const short = id.replace(/-/g, "").slice(0, 4).toUpperCase();
-  return `${prefix}-${short}`;
-}

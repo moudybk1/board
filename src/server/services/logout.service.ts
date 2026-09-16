@@ -6,10 +6,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { getDb } from "@/server/db";
 import { sessions } from "@/server/db/schema";
 import { hashSessionToken } from "@/server/lib/session-token";
-
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
 
 export class SessionRevokeError extends Error {
   status: number;

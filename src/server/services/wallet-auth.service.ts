@@ -14,6 +14,7 @@ import { getDb } from "@/server/db";
 import { sessions, userBalances, users, wallets } from "@/server/db/schema";
 import {
   AuthError,
+  mapUser,
   type AuthSessionResult,
   type AuthUserView,
 } from "@/server/services/auth.service";
@@ -22,10 +23,7 @@ import {
   hashSessionToken,
   sessionExpiryDate,
 } from "@/server/lib/session-token";
-
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
 
 type Challenge = {
   nonce: string;
@@ -99,16 +97,6 @@ async function assertSignature(input: {
   if (!valid) {
     throw new AuthError("Invalid wallet signature.", 401);
   }
-}
-
-function mapUser(row: typeof users.$inferSelect): AuthUserView {
-  return {
-    id: row.id,
-    username: row.username,
-    email: row.email,
-    avatarId: row.avatarId,
-    balance: Number(row.balance),
-  };
 }
 
 async function insertSession(

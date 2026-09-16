@@ -4,10 +4,7 @@ import { MOCK_BALANCE, MOCK_PLAYER } from "@/lib/mock/lobby";
 import { getDb } from "@/server/db";
 import { transactions, users } from "@/server/db/schema";
 import { getUserBalance } from "@/server/services/balance.service";
-
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
 
 export type WithdrawRequest = {
   userId: string;

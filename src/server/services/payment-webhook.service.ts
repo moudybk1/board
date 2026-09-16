@@ -10,20 +10,12 @@ import {
   rewardPayouts,
   transactions,
 } from "@/server/db/schema";
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
+import { defineServiceError } from "@/server/lib/service-error";
+import { confirmDeposit } from "@/server/services/deposit-confirm.service";
+import { processWithdraw } from "@/server/services/withdraw-process.service";
 
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
-
-export class PaymentWebhookError extends Error {
-  status: number;
-
-  constructor(message: string, status = 400) {
-    super(message);
-    this.name = "PaymentWebhookError";
-    this.status = status;
-  }
-}
+export const PaymentWebhookError = defineServiceError("PaymentWebhookError");
 
 export type PaymentWebhookKind = "reward_payout" | "deposit" | "withdraw";
 
@@ -48,23 +40,6 @@ export type ProcessPaymentWebhookResult = {
   txHash: string | null;
   source: "database" | "mock";
 };
-
-/**
- * Shared secret check for chain-indexer / payment webhooks.
- * When `PAYMENT_WEBHOOK_SECRET` is unset, requests are allowed (local mock).
- */
-export function assertWebhookSecret(request: Request): void {
-  const expected = process.env.PAYMENT_WEBHOOK_SECRET?.trim();
-  if (!expected) return;
-
-  const header =
-    request.headers.get("x-webhook-secret")?.trim() ||
-    request.headers.get("authorization")?.replace(/^Bearer\s+/i, "").trim();
-
-  if (!header || header !== expected) {
-    throw new PaymentWebhookError("Invalid webhook secret.", 401);
-  }
-}
 
 function normalizePayoutStatus(
   status: PaymentWebhookStatus,
@@ -246,77 +221,79 @@ async function confirmWalletTransaction(
 ): Promise<ProcessPaymentWebhookResult> {
   const nextStatus = normalizeTxStatus(input.status);
   const expectedType = input.kind === "deposit" ? "deposit" : "withdraw";
-  const txHash =
-    nextStatus === "failed"
-      ? null
-      : (input.txHash ?? `0x${expectedType.slice(0, 3)}${Date.now().toString(16)}`);
 
   if (!dbConfigured()) {
     return {
       kind: input.kind,
       id: input.id,
       status: nextStatus,
-      txHash,
+      txHash: nextStatus === "failed" ? null : (input.txHash ?? null),
       source: "mock",
     };
   }
 
+  const settled = await settledTransaction(input.id, expectedType, nextStatus);
+  if (settled) return settled;
+
+  // Delegate to the same services the direct confirm/process endpoints call.
+  // An earlier version updated `transactions.status` here and moved no money,
+  // so a deposit confirmed through the webhook was never credited and could
+  // not be confirmed again through the other path.
+  const fail = nextStatus === "failed";
+  const result =
+    input.kind === "deposit"
+      ? await confirmDeposit({
+          transactionId: input.id,
+          txHash: input.txHash,
+          fail,
+        })
+      : await processWithdraw({
+          transactionId: input.id,
+          txHash: input.txHash,
+          fail,
+        });
+
+  return {
+    kind: input.kind,
+    id: result.transaction.id,
+    status: result.transaction.status,
+    txHash: result.transaction.txHash,
+    source: result.source,
+  };
+}
+
+/**
+ * Absorb the provider's retries: a row already in the status this delivery
+ * implies is returned unchanged instead of being settled twice. Returns null
+ * when the row still needs processing.
+ */
+async function settledTransaction(
+  id: string,
+  expectedType: "deposit" | "withdraw",
+  nextStatus: "confirmed" | "failed",
+): Promise<ProcessPaymentWebhookResult | null> {
   const db = getDb();
+  const [row] = await db
+    .select()
+    .from(transactions)
+    .where(and(eq(transactions.id, id), eq(transactions.type, expectedType)))
+    .limit(1);
 
-  return db.transaction(async (tx) => {
-    const [row] = await tx
-      .select()
-      .from(transactions)
-      .where(
-        and(
-          eq(transactions.id, input.id),
-          eq(transactions.type, expectedType),
-        ),
-      )
-      .limit(1)
-      .for("update");
+  if (!row) {
+    throw new PaymentWebhookError(`${expectedType} not found.`, 404);
+  }
 
-    if (!row) {
-      throw new PaymentWebhookError(`${expectedType} not found.`, 404);
-    }
+  if (row.status === "pending") return null;
 
-    if (row.status !== "pending" && row.status !== nextStatus) {
-      throw new PaymentWebhookError(
-        `${expectedType} is no longer pending.`,
-        409,
-      );
-    }
+  if (row.status !== nextStatus) {
+    throw new PaymentWebhookError(`${expectedType} is no longer pending.`, 409);
+  }
 
-    if (row.status === nextStatus && row.txHash) {
-      return {
-        kind: input.kind,
-        id: row.id,
-        status: row.status,
-        txHash: row.txHash,
-        source: "database" as const,
-      };
-    }
-
-    const [updated] = await tx
-      .update(transactions)
-      .set({
-        status: nextStatus,
-        txHash,
-        note:
-          nextStatus === "failed"
-            ? "Rejected by on-chain payment webhook"
-            : row.note,
-        updatedAt: new Date(),
-      })
-      .where(eq(transactions.id, row.id))
-      .returning();
-
-    return {
-      kind: input.kind,
-      id: updated.id,
-      status: updated.status,
-      txHash: updated.txHash,
-      source: "database" as const,
-    };
-  });
+  return {
+    kind: expectedType,
+    id: row.id,
+    status: row.status,
+    txHash: row.txHash,
+    source: "database",
+  };
 }

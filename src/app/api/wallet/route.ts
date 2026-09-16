@@ -1,25 +1,19 @@
 import { NextResponse } from "next/server";
 
-import { resolveRequestUser } from "@/server/lib/resolve-user";
+import { errorResponse } from "@/server/lib/api-response";
+import { requireUser } from "@/server/lib/require-user";
 import { getWalletStatus } from "@/server/services/wallet-status.service";
 
-/**
- * GET /api/wallet · available/locked BOARD balance plus network/wallet status.
- */
+/** GET /api/wallet · available/locked BOARD balance plus network/wallet status. */
 export async function GET(request: Request) {
-  const { userId } = await resolveRequestUser(request);
-
   try {
+    const { userId } = await requireUser(request);
     const status = await getWalletStatus(userId);
     if (!status) {
       return NextResponse.json({ error: "User not found." }, { status: 404 });
     }
     return NextResponse.json(status);
   } catch (error) {
-    console.error("[GET /api/wallet]", error);
-    return NextResponse.json(
-      { error: "Failed to load wallet status." },
-      { status: 500 },
-    );
+    return errorResponse(error, "GET /api/wallet");
   }
 }

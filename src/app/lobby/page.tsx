@@ -4,6 +4,7 @@ import { BalanceStrip } from "@/components/lobby/balance-strip";
 import { LobbyBoard } from "@/components/lobby/lobby-board";
 import { HeroStat, PageHero } from "@/components/layout/page-hero";
 import { ProductShell } from "@/components/layout/product-shell";
+import { SampleDataNotice } from "@/components/layout/sample-data-notice";
 import { LobbyHeroActions } from "@/components/lobby/lobby-hero-actions";
 import { RoomEconomyHighlight } from "@/components/ui/room-economy-highlight";
 import {
@@ -13,6 +14,7 @@ import {
   MOCK_NOW,
   MOCK_ROOMS,
 } from "@/lib/mock/lobby";
+import { PLAY_IS_LIVE } from "@/lib/platform-status";
 import { formatBoardCompact } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -40,7 +42,7 @@ export default function LobbyPage() {
             <HeroStat
               label="Playing"
               value={formatBoardCompact(playingNow)}
-              pulse
+              pulse={PLAY_IS_LIVE}
             />
             <HeroStat label="Open" value={String(openRooms.length)} />
             <HeroStat
@@ -85,6 +87,8 @@ export default function LobbyPage() {
           </div>
         }
       />
+
+      <SampleDataNotice />
 
       <div
         data-reveal

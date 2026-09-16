@@ -3,10 +3,7 @@ import { eq } from "drizzle-orm";
 import { MOCK_PLAYER, MOCK_BALANCE } from "@/lib/mock/lobby";
 import { getDb } from "@/server/db";
 import { transactions, users } from "@/server/db/schema";
-
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
 
 export type DepositRequest = {
   userId: string;

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { fetchJson } from "@/lib/fetch-json";
 import type { WalletBalance } from "@/lib/types";
 import type { WalletStatusResult } from "@/server/services/wallet-status.service";
 
@@ -12,49 +13,68 @@ type UsePlatformWalletOptions = {
   enabled?: boolean;
 };
 
-/**
- * Load platform ledger balance + linked-wallet status from GET /api/wallet.
- */
+/** Shortest polling interval worth setting up a timer for. */
+const MIN_POLL_MS = 1_000;
+
+const FAILED_MESSAGE = "Failed to load wallet status.";
+
+/** Load platform ledger balance + linked-wallet status from GET /api/wallet. */
 export function usePlatformWallet(options: UsePlatformWalletOptions = {}) {
   const { pollMs = 0, enabled = true } = options;
   const [data, setData] = useState<PlatformWalletStatus | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(enabled);
+  const [pending, setPending] = useState(true);
 
   const refresh = useCallback(async () => {
     if (!enabled) return null;
     try {
-      const res = await fetch("/api/wallet", { credentials: "include" });
-      if (!res.ok) {
-        const body = (await res.json().catch(() => null)) as {
-          error?: string;
-        } | null;
-        throw new Error(body?.error || `Wallet status failed (${res.status})`);
-      }
-      const json = (await res.json()) as PlatformWalletStatus;
+      const json = await fetchJson<PlatformWalletStatus>("/api/wallet");
       setData(json);
       setError(null);
       return json;
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Failed to load wallet status.";
-      setError(message);
+      setError(err instanceof Error ? err.message : FAILED_MESSAGE);
       return null;
     } finally {
-      setLoading(false);
+      setPending(false);
     }
   }, [enabled]);
 
   useEffect(() => {
-    if (!enabled) {
-      setLoading(false);
-      return;
+    if (!enabled) return;
+
+    // State is written in the async continuation and dropped after unmount, so
+    // the effect body itself never calls setState.
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const json = await fetchJson<PlatformWalletStatus>("/api/wallet");
+        if (cancelled) return;
+        setData(json);
+        setError(null);
+      } catch (err) {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : FAILED_MESSAGE);
+      } finally {
+        if (!cancelled) setPending(false);
+      }
+    };
+
+    void load();
+
+    if (!pollMs || pollMs < MIN_POLL_MS) {
+      return () => {
+        cancelled = true;
+      };
     }
-    void refresh();
-    if (!pollMs || pollMs < 1_000) return;
-    const id = window.setInterval(() => void refresh(), pollMs);
-    return () => window.clearInterval(id);
-  }, [refresh, pollMs, enabled]);
+
+    const id = window.setInterval(() => void load(), pollMs);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, [pollMs, enabled]);
 
   const balance: WalletBalance | null = data
     ? {
@@ -65,5 +85,7 @@ export function usePlatformWallet(options: UsePlatformWalletOptions = {}) {
       }
     : null;
 
-  return { data, balance, error, loading, refresh };
+  // Derived rather than stored: a disabled hook never loads, so it is never
+  // loading. Setting that in an effect was a redundant render.
+  return { data, balance, error, loading: enabled && pending, refresh };
 }

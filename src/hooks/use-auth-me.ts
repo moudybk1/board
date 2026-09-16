@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+import { fetchJson, HttpError } from "@/lib/fetch-json";
+
 export type AuthMeUser = {
   id: string;
   username: string;
@@ -22,9 +24,19 @@ export type AuthMeResult = {
   wallet?: AuthMeWallet | null;
 };
 
-/**
- * Current BOARD session (wallet-only). Polls lightly after login.
- */
+const SIGNED_OUT: AuthMeResult = { authenticated: false };
+
+/** Read the session. A 401 means signed out, which is not an error to show. */
+async function loadAuthMe(): Promise<AuthMeResult> {
+  try {
+    return await fetchJson<AuthMeResult>("/api/auth/me");
+  } catch (error) {
+    if (error instanceof HttpError && error.status === 401) return SIGNED_OUT;
+    throw error;
+  }
+}
+
+/** Current BOARD session (wallet-only). */
 export function useAuthMe() {
   const [data, setData] = useState<AuthMeResult | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,19 +44,10 @@ export function useAuthMe() {
 
   const refresh = useCallback(async () => {
     try {
-      const res = await fetch("/api/auth/me", { credentials: "include" });
-      if (res.status === 401) {
-        setData({ authenticated: false });
-        setError(null);
-        return { authenticated: false } as AuthMeResult;
-      }
-      if (!res.ok) {
-        throw new Error("Failed to load session.");
-      }
-      const json = (await res.json()) as AuthMeResult;
-      setData(json);
+      const result = await loadAuthMe();
+      setData(result);
       setError(null);
-      return json;
+      return result;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Session error");
       return null;
@@ -54,13 +57,33 @@ export function useAuthMe() {
   }, []);
 
   useEffect(() => {
-    void refresh();
-  }, [refresh]);
+    // State is written in the async continuation and dropped after unmount, so
+    // the effect body itself never calls setState.
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const result = await loadAuthMe();
+        if (cancelled) return;
+        setData(result);
+        setError(null);
+      } catch (err) {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : "Session error");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return {
     data,
-    user: data?.authenticated ? data.user ?? null : null,
-    wallet: data?.authenticated ? data.wallet ?? null : null,
+    user: data?.authenticated ? (data.user ?? null) : null,
+    wallet: data?.authenticated ? (data.wallet ?? null) : null,
     authenticated: Boolean(data?.authenticated),
     loading,
     error,

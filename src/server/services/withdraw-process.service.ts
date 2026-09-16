@@ -1,7 +1,7 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { getDb } from "@/server/db";
-import { transactions, userBalances, users } from "@/server/db/schema";
+import { transactions } from "@/server/db/schema";
 import {
   getMockPendingWithdraw,
   upsertMockWithdraw,
@@ -9,10 +9,11 @@ import {
   type WithdrawResult,
 } from "@/server/services/withdraw.service";
 import { getUserBalance } from "@/server/services/balance.service";
-
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
+import {
+  applyBalanceDelta,
+  lockAvailable,
+} from "@/server/db/repositories/balances.repository";
 
 export type ProcessWithdrawInput = {
   transactionId: string;
@@ -88,6 +89,12 @@ export async function processWithdraw(
 
     const absolute = Math.abs(Number(row.amount));
 
+    // Locks each balance table separately. A single `FOR UPDATE` over the
+    // LEFT JOIN these columns used to share is rejected by Postgres (0A000,
+    // nullable side of an outer join), which made every database-backed
+    // withdraw fail with a 500.
+    const available = await lockAvailable(tx, row.userId);
+
     if (input.fail) {
       const [updated] = await tx
         .update(transactions)
@@ -99,30 +106,12 @@ export async function processWithdraw(
         .where(eq(transactions.id, row.id))
         .returning();
 
-      const balance = await getUserBalance(row.userId);
-
       return {
         transaction: mapRow(updated),
-        availableAfter: balance?.available ?? 0,
+        availableAfter: available,
         source: "database" as const,
       };
     }
-
-    const [balanceRow] = await tx
-      .select({
-        available: userBalances.available,
-        legacy: users.balance,
-      })
-      .from(users)
-      .leftJoin(userBalances, eq(userBalances.userId, users.id))
-      .where(eq(users.id, row.userId))
-      .limit(1)
-      .for("update");
-
-    const available =
-      balanceRow?.available != null
-        ? Number(balanceRow.available)
-        : Number(balanceRow?.legacy ?? 0);
 
     if (absolute > available) {
       throw new WithdrawError(
@@ -144,33 +133,14 @@ export async function processWithdraw(
       .where(eq(transactions.id, row.id))
       .returning();
 
-    await tx
-      .insert(userBalances)
-      .values({
-        userId: row.userId,
-        available: (available - absolute).toFixed(2),
-        chain: row.chain,
-        walletAddress: row.walletAddress,
-        updatedAt: new Date(),
-      })
-      .onConflictDoUpdate({
-        target: userBalances.userId,
-        set: {
-          available: sql`${userBalances.available} - ${absolute.toFixed(2)}`,
-          updatedAt: new Date(),
-        },
-      });
-
-    await tx
-      .update(users)
-      .set({
-        balance: sql`${users.balance} - ${absolute.toFixed(2)}`,
-      })
-      .where(eq(users.id, row.userId));
+    const availableAfter = await applyBalanceDelta(tx, row.userId, -absolute, {
+      chain: row.chain,
+      walletAddress: row.walletAddress,
+    });
 
     return {
       transaction: mapRow(updated),
-      availableAfter: available - absolute,
+      availableAfter,
       source: "database" as const,
     };
   });

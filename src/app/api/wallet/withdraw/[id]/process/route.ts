@@ -1,7 +1,13 @@
 import { NextResponse } from "next/server";
 
+import {
+  errorResponse,
+  readJsonBody,
+  readOptionalBoolean,
+  readOptionalString,
+} from "@/server/lib/api-response";
+import { assertServiceSecret } from "@/server/lib/service-auth";
 import { processWithdraw } from "@/server/services/withdraw-process.service";
-import { WithdrawError } from "@/server/services/withdraw.service";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -11,7 +17,8 @@ type RouteContext = {
  * POST /api/wallet/withdraw/[id]/process · debit balance and confirm (or fail)
  * a pending withdraw. Stands in for the chain send worker.
  *
- * Body (optional): `{ txHash?: string, fail?: boolean }`
+ * Moves money, so it is authenticated with the shared service secret rather
+ * than a player session. Body (optional): `{ txHash?: string, fail?: boolean }`
  */
 export async function POST(request: Request, context: RouteContext) {
   const { id } = await context.params;
@@ -22,34 +29,17 @@ export async function POST(request: Request, context: RouteContext) {
     );
   }
 
-  let body: { txHash?: string; fail?: boolean } = {};
   try {
-    const raw = await request.json();
-    if (raw && typeof raw === "object") {
-      body = raw as { txHash?: string; fail?: boolean };
-    }
-  } catch {
-    // empty body ok
-  }
+    assertServiceSecret(request);
+    const body = await readJsonBody(request);
 
-  try {
     const result = await processWithdraw({
       transactionId: id,
-      txHash: typeof body.txHash === "string" ? body.txHash : undefined,
-      fail: Boolean(body.fail),
+      txHash: readOptionalString(body, "txHash"),
+      fail: readOptionalBoolean(body, "fail") ?? false,
     });
     return NextResponse.json(result);
   } catch (error) {
-    if (error instanceof WithdrawError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.status },
-      );
-    }
-    console.error(`[POST /api/wallet/withdraw/${id}/process]`, error);
-    return NextResponse.json(
-      { error: "Failed to process withdraw." },
-      { status: 500 },
-    );
+    return errorResponse(error, "POST /api/wallet/withdraw/:id/process");
   }
 }

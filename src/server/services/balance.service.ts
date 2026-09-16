@@ -4,13 +4,10 @@ import { MOCK_BALANCE, MOCK_PLAYER } from "@/lib/mock/lobby";
 import type { WalletBalance } from "@/lib/types";
 import { getDb } from "@/server/db";
 import { roomPlayers, rooms, userBalances, users } from "@/server/db/schema";
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
 
 const DEFAULT_CHAIN = "Robinhood Chain";
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
-
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
 
 export type BalanceResult = WalletBalance & {
   userId: string;
@@ -21,6 +18,10 @@ export type BalanceResult = WalletBalance & {
  * BOARD balance for a user: spendable `available` from `user_balances`
  * (falling back to `users.balance`), plus `locked` = sum of entry fees for
  * rooms that are still waiting or playing.
+ *
+ * `available` already excludes entry fees, which are debited on join through
+ * the balance repository. `locked` reports how much is currently at stake in
+ * live rooms; it is not a second deduction, so callers must not subtract it.
  */
 export async function getUserBalance(userId: string): Promise<BalanceResult | null> {
   if (!dbConfigured()) {

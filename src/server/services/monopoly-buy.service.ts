@@ -12,11 +12,15 @@ import {
   monopolyMatches,
   monopolyPlayers,
   monopolyProperties,
-  rooms,
   users,
 } from "@/server/db/schema";
 import { MOCK_MONOPOLY_LIVE } from "@/server/services/join-room.service";
 import { broadcastMonopolyAction } from "@/server/services/monopoly-sync.service";
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
+import {
+  findRoomByRef,
+  formatRoomCode,
+} from "@/server/db/repositories/rooms.repository";
 
 export type MonopolyBuyResult =
   | {
@@ -45,10 +49,6 @@ export type MonopolyBuyResult =
       shortfall?: number;
     };
 
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
-
 /**
  * Buy the country (or other priced tile) the active seat is standing on.
  * Deducts in-game cash and records ownership · not the wallet balance.
@@ -65,12 +65,7 @@ export async function buyMonopolyProperty(
   const db = getDb();
 
   const result = await db.transaction(async (tx) => {
-    const roomRows = await tx.select().from(rooms);
-    const room = roomRows.find(
-      (row) =>
-        row.id === roomRef ||
-        formatRoomCode(row.id, row.gameType) === roomRef.toUpperCase(),
-    );
+    const room = await findRoomByRef(tx, roomRef);
 
     if (!room || room.gameType !== "monopoly") {
       return {
@@ -434,8 +429,3 @@ function buyMonopolyMock(
   };
 }
 
-function formatRoomCode(id: string, gameType: "monopoly" | "ludo") {
-  const prefix = gameType === "monopoly" ? "MNP" : "LUD";
-  const short = id.replace(/-/g, "").slice(0, 4).toUpperCase();
-  return `${prefix}-${short}`;
-}
