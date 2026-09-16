@@ -21,7 +21,7 @@ const ACCENT: Record<NonNullable<ProductShellProps["accent"]>, string> = {
 };
 
 /**
- * Shared product page shell: CRT felt field + inset stage + staggered reveal.
+ * Shared product page shell: cartoon felt table + sticker stage + reveal.
  */
 export function ProductShell({
   children,

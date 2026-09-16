@@ -36,7 +36,7 @@ export function AudioControlsPopover({ className }: { className?: string }) {
         type="button"
         aria-label="Audio volume controls"
         aria-expanded={open}
-        className="pixel-corners grid size-8 place-items-center border-2 border-edge bg-surface text-muted transition-colors hover:border-edge-bright hover:text-parchment sm:size-9"
+        className="grid size-8 place-items-center rounded-full border-[3px] border-void bg-cream text-muted shadow-pixel-sm transition-colors hover:bg-gold hover:text-void sm:size-9"
         onClick={() => {
           void unlockAudio();
           setOpen((value) => !value);
@@ -46,8 +46,8 @@ export function AudioControlsPopover({ className }: { className?: string }) {
       </button>
 
       {open ? (
-        <div className="absolute right-0 top-[calc(100%+0.5rem)] z-[50] w-56 border-2 border-edge-bright bg-surface-raised p-3 shadow-pixel">
-          <p className="mb-3 font-pixel text-[8px] uppercase text-faint">
+        <div className="absolute right-0 top-[calc(100%+0.5rem)] z-[50] w-56 rounded-[1.25rem] border-[3px] border-void bg-surface p-3 shadow-pixel">
+          <p className="mb-3 font-pixel text-xs font-bold uppercase text-faint">
             Audio mix
           </p>
           <AudioVolumeControls />

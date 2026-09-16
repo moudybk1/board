@@ -58,9 +58,9 @@ export function SettingsBoard({ className }: { className?: string }) {
   return (
     <div className={cn("grid gap-5 lg:grid-cols-2 lg:gap-6", className)}>
       <PixelPanel tone="raised" className="overflow-hidden">
-        <PixelPanelHeader className="bg-void/55">
+        <PixelPanelHeader className="bg-gold/30">
           <div className="flex items-center gap-2">
-            <Monitor className="size-3.5 text-gold" aria-hidden />
+            <Monitor className="size-3.5 text-gold-deep" aria-hidden />
             <PixelPanelTitle>Display</PixelPanelTitle>
           </div>
         </PixelPanelHeader>
@@ -73,22 +73,22 @@ export function SettingsBoard({ className }: { className?: string }) {
           />
           <div className="h-px bg-edge" aria-hidden />
           <PixelSwitch
-            label="CRT scanlines"
-            description="Soft horizontal lines across the page field."
+            label="Confetti dots"
+            description="Tiny candy dots sprinkled across the playground."
             checked={scanlines}
             onChange={setScanlines}
           />
-          <p className="border-2 border-edge bg-ink/60 px-3 py-3 text-xs leading-relaxed text-muted">
-            Pixel fonts stay crisp either way. Colour theme stays on the
-            phosphor cabinet palette.
+          <p className="rounded-[1rem] border-[3px] border-void bg-cream px-3 py-3 text-sm leading-relaxed text-muted">
+            Type stays round and readable either way. The table stays a sunny
+            cartoon playground.
           </p>
         </div>
       </PixelPanel>
 
       <PixelPanel tone="gold" className="overflow-hidden">
-        <PixelPanelHeader className="bg-void/40">
+        <PixelPanelHeader className="bg-gold/40">
           <div className="flex items-center gap-2">
-            <Volume2 className="size-3.5 text-gold" aria-hidden />
+            <Volume2 className="size-3.5 text-gold-deep" aria-hidden />
             <PixelPanelTitle>Sound</PixelPanelTitle>
           </div>
         </PixelPanelHeader>

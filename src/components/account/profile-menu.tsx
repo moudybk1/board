@@ -138,7 +138,7 @@ export function ProfileMenu({ className }: { className?: string }) {
           playSfx("ui_click");
           setOpen((v) => !v);
         }}
-        className="pixel-corners inline-flex max-w-[10.5rem] items-center justify-center border-2 border-gold-deep bg-gold px-3 py-2 font-pixel text-[8px] uppercase text-void shadow-pixel transition-[transform,box-shadow,background-color] duration-100 hover:bg-gold/85 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none sm:text-[9px]"
+        className="inline-flex max-w-[10.5rem] items-center justify-center rounded-full border-[3px] border-void bg-gold px-3 py-2 font-pixel text-xs font-bold uppercase text-void shadow-pixel-sm transition-[transform,box-shadow,background-color] duration-100 hover:bg-[#ffe566] active:translate-y-[3px] active:shadow-none sm:text-sm"
       >
         <span className="truncate">
           {authLoading ? "…" : label}
@@ -148,13 +148,13 @@ export function ProfileMenu({ className }: { className?: string }) {
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 top-[calc(100%+0.5rem)] z-[55] w-[min(18.5rem,calc(100vw-1.5rem))] border-2 border-edge-bright bg-ink shadow-pixel-lg"
+          className="absolute right-0 top-[calc(100%+0.5rem)] z-[55] w-[min(18.5rem,calc(100vw-1.5rem))] rounded-[1.35rem] border-[3px] border-void bg-surface shadow-pixel-lg"
         >
           <div className="border-b-2 border-edge px-3 py-3">
-            <p className="font-pixel text-[8px] uppercase tracking-wider text-gold">
+            <p className="font-pixel text-xs font-bold uppercase tracking-wide text-gold-deep">
               Profile
             </p>
-            <p className="mt-2 break-all font-mono text-[10px] text-parchment">
+            <p className="mt-2 break-all font-pixel text-sm text-parchment">
               {address ? shortenAddress(address, 6) : "—"}
             </p>
             {user?.username ? (
@@ -234,7 +234,7 @@ export function ProfileMenu({ className }: { className?: string }) {
             <Link
               href="/account"
               role="menuitem"
-              className="pixel-corners inline-flex items-center justify-center border-2 border-edge-bright bg-transparent px-3 py-2 font-pixel text-[9px] uppercase text-parchment shadow-pixel-sm hover:bg-surface-hover"
+              className="rounded-full inline-flex items-center justify-center border-[3px] border-void bg-cream px-3 py-2 font-pixel text-xs font-bold uppercase text-parchment shadow-pixel-sm hover:bg-gold"
               onClick={() => {
                 playSfx("ui_click");
                 setOpen(false);

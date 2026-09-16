@@ -161,7 +161,7 @@ export function WithdrawForm({ className }: { className?: string }) {
             if (error) setError(null);
           }}
           className={cn(
-            "mt-2 w-full border-2 bg-void px-3 py-3 font-pixel text-sm text-parchment outline-none focus:border-gold",
+            "mt-2 w-full rounded-[1.15rem] border-[3px] bg-cream px-3 py-3 font-pixel text-base text-parchment outline-none focus:border-gold-deep",
             error ? "border-danger" : "border-edge",
           )}
         />

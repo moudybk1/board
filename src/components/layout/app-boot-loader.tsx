@@ -223,7 +223,7 @@ export function AppBootLoader() {
       aria-busy={phase === "loading"}
       aria-label="Loading BOARD"
       className={cn(
-        "fixed inset-0 z-[100] flex flex-col items-center justify-center bg-void",
+        "fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#7ed6ff]",
         "transition-opacity duration-[420ms] ease-out",
         phase === "leaving" && "pointer-events-none opacity-0",
       )}
@@ -233,7 +233,7 @@ export function AppBootLoader() {
         className="pointer-events-none absolute inset-0 opacity-[0.35]"
         style={{
           backgroundImage:
-            "radial-gradient(ellipse at 50% 30%, rgba(255,216,74,0.16), transparent 55%), radial-gradient(ellipse at 85% 70%, rgba(61,220,255,0.1), transparent 50%), radial-gradient(ellipse at 15% 80%, rgba(255,107,157,0.1), transparent 50%), repeating-linear-gradient(45deg, transparent, transparent 6px, rgba(58,143,191,0.28) 6px, rgba(58,143,191,0.28) 7px)",
+            "radial-gradient(circle at 88% 12%, #ffe566 0 8%, transparent 9%), radial-gradient(ellipse at 50% 30%, rgba(255,210,58,0.35), transparent 55%), radial-gradient(ellipse at 85% 70%, rgba(232,63,134,0.18), transparent 50%), radial-gradient(ellipse at 15% 80%, rgba(18,152,201,0.2), transparent 50%)",
         }}
       />
 
@@ -243,12 +243,11 @@ export function AppBootLoader() {
           alt=""
           width={40}
           height={40}
-          data-pixel
           className="mb-5 size-9 bg-transparent sm:size-10"
           draggable={false}
         />
 
-        <p className="font-pixel text-[clamp(1.35rem,6vw,1.85rem)] tracking-[0.08em] text-gold text-shadow-pixel">
+        <p className="font-pixel text-[clamp(1.6rem,6vw,2.4rem)] font-bold tracking-tight text-parchment">
           BOARD
         </p>
 
@@ -260,20 +259,20 @@ export function AppBootLoader() {
           <BootDie face={faces[1]} which="b" />
         </div>
 
-        <p className="mt-8 font-pixel text-[9px] uppercase tracking-[0.22em] text-muted">
+        <p className="mt-8 font-pixel text-sm font-bold uppercase tracking-wide text-muted">
           Rolling tables
         </p>
 
         <div className="mt-6 w-full">
-          <div className="h-3 w-full border-2 border-edge-bright bg-ink p-0.5 shadow-pixel-sm">
+          <div className="h-4 w-full overflow-hidden rounded-full border-[3px] border-void bg-cream p-0.5 shadow-pixel-sm">
             <div
-              className="h-full bg-gold transition-[width] duration-150 ease-out"
+              className="h-full rounded-full bg-gold transition-[width] duration-150 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>
-          <div className="mt-3 flex items-center justify-between font-pixel text-[8px] uppercase tracking-wider text-faint">
+          <div className="mt-3 flex items-center justify-between font-pixel text-xs font-bold uppercase tracking-wide text-faint">
             <span>{phase === "leaving" ? "Ready" : "Loading"}</span>
-            <span className="text-gold">{Math.round(progress)}%</span>
+            <span className="text-gold-deep">{Math.round(progress)}%</span>
           </div>
         </div>
       </div>
@@ -294,11 +293,11 @@ function BootDie({
     <div className="relative">
       <div
         data-boot-shadow={which}
-        className="absolute -bottom-2.5 left-1/2 h-2.5 w-[78%] -translate-x-1/2 bg-void/55"
+        className="absolute -bottom-2.5 left-1/2 h-2.5 w-[78%] -translate-x-1/2 rounded-full bg-void/35"
       />
       <div
         data-boot-die={which}
-        className="relative grid size-[4.25rem] grid-cols-3 grid-rows-3 gap-1.5 border-4 border-void bg-parchment p-1.5 shadow-pixel-lg sm:size-[4.75rem] sm:gap-[7px] sm:p-2"
+        className="relative grid size-[4.25rem] grid-cols-3 grid-rows-3 gap-1.5 rounded-[1.1rem] border-4 border-void bg-cream p-1.5 shadow-pixel-lg sm:size-[4.75rem] sm:gap-[7px] sm:p-2"
         style={{ transformOrigin: "50% 85%" }}
       >
         <span className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-white/35" />
@@ -307,7 +306,7 @@ function BootDie({
           <span
             key={cell}
             className={cn(
-              "rounded-none",
+              "rounded-full",
               pips.includes(cell) ? "bg-void" : "bg-transparent",
             )}
           />

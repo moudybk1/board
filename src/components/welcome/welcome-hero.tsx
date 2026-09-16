@@ -68,7 +68,7 @@ export function WelcomeHero({
     <section
       ref={root}
       className={cn(
-        "relative isolate flex min-h-[100dvh] flex-col overflow-hidden bg-ink pt-14 sm:pt-16",
+        "relative isolate flex min-h-[100dvh] flex-col overflow-hidden pt-4 sm:pt-6",
         className,
       )}
     >
@@ -82,31 +82,31 @@ export function WelcomeHero({
       <div className="relative z-20 mx-auto grid w-full max-w-[90rem] flex-1 grid-cols-1 px-3 pb-6 pt-3 sm:px-6 sm:pb-10 lg:grid-cols-2 lg:items-center lg:gap-8 lg:px-10 lg:pb-16 xl:px-14">
         {/* Mobile: leave top air for dice; desktop: center the dock */}
         <div className="flex flex-col justify-end pt-[38vh] sm:pt-[32vh] lg:justify-center lg:pt-0">
-          <div className="w-full max-w-[26rem] border-4 border-edge-bright bg-ink p-5 shadow-pixel-lg sm:max-w-[28rem] sm:p-7">
+          <div className="w-full max-w-[26rem] rounded-[1.75rem] border-[4px] border-void bg-surface p-5 shadow-pixel-lg sm:max-w-[28rem] sm:p-7">
             <p
               data-hero-in
-              className="font-pixel text-[10px] uppercase tracking-[0.22em] text-gold"
+              className="font-pixel text-xs font-bold uppercase tracking-wide text-gold-deep"
             >
               {WELCOME_HERO.eyebrow}
             </p>
 
             <h1
               data-hero-brand
-              className="mt-3 font-pixel text-[clamp(2.1rem,8vw,3.5rem)] leading-[1.2] tracking-[0.06em] text-gold text-shadow-pixel"
+              className="mt-3 font-pixel text-[clamp(2.4rem,8vw,4rem)] font-bold leading-[1.05] tracking-tight text-parchment"
             >
               {WELCOME_HERO.brand}
             </h1>
 
             <p
               data-hero-in
-              className="mt-5 font-pixel text-[14px] leading-[1.65] text-parchment sm:text-[15px]"
+              className="mt-5 text-lg font-semibold leading-snug text-parchment sm:text-xl"
             >
               {WELCOME_HERO.headline}
             </p>
 
             <p
               data-hero-in
-              className="mt-3 font-pixel text-[11px] leading-[1.9] text-parchment/85 sm:text-[12px]"
+              className="mt-3 text-base leading-relaxed text-muted"
             >
               {WELCOME_HERO.support}
             </p>
@@ -144,36 +144,36 @@ export function WelcomeHero({
 
             <p
               data-hero-in
-              className="mt-5 border-t-2 border-edge pt-4 font-pixel text-[10px] leading-[1.8] text-gold sm:text-[11px]"
+              className="mt-5 border-t-[3px] border-void pt-4 text-sm font-bold text-gold-deep sm:text-base"
             >
               {WELCOME_HERO.proof}
             </p>
 
             <dl
               data-hero-in
-              className="mt-4 grid grid-cols-3 gap-2 border-t-2 border-edge pt-4"
+              className="mt-4 grid grid-cols-3 gap-2 border-t-[3px] border-void pt-4"
             >
               <div>
-                <dt className="font-pixel text-[8px] uppercase tracking-wider text-faint">
+                <dt className="font-pixel text-[11px] font-bold uppercase tracking-wide text-faint">
                   Rooms
                 </dt>
-                <dd className="mt-1 font-pixel text-[11px] text-parchment sm:text-[12px]">
+                <dd className="mt-1 font-pixel text-base font-bold text-parchment sm:text-lg">
                   {WELCOME_LIVE_PULSE.openRooms}
                 </dd>
               </div>
               <div>
-                <dt className="font-pixel text-[8px] uppercase tracking-wider text-faint">
+                <dt className="font-pixel text-[11px] font-bold uppercase tracking-wide text-faint">
                   Seated
                 </dt>
-                <dd className="mt-1 font-pixel text-[11px] text-parchment sm:text-[12px]">
+                <dd className="mt-1 font-pixel text-base font-bold text-parchment sm:text-lg">
                   {WELCOME_LIVE_PULSE.playersOnline.toLocaleString("en-US")}
                 </dd>
               </div>
               <div>
-                <dt className="font-pixel text-[8px] uppercase tracking-wider text-faint">
+                <dt className="font-pixel text-[11px] font-bold uppercase tracking-wide text-faint">
                   Won
                 </dt>
-                <dd className="mt-1 font-pixel text-[11px] text-gold sm:text-[12px]">
+                <dd className="mt-1 font-pixel text-base font-bold text-gold-deep sm:text-lg">
                   {formatBoardCompact(WELCOME_LIVE_PULSE.potToday)}
                 </dd>
               </div>

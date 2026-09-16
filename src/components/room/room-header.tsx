@@ -26,13 +26,13 @@ export function RoomHeader({
   void pot;
 
   return (
-    <header className="border-b-2 border-edge bg-ink/90">
+    <header className="border-b-[3px] border-void bg-surface/90 backdrop-blur-sm">
       <div className="mx-auto flex w-full max-w-[1800px] flex-wrap items-center gap-2 px-3 py-2.5 sm:gap-3 sm:px-6 sm:py-3">
         <Link href="/" aria-label="BOARD home" className="shrink-0">
-          <BoardLogo className="text-xs sm:text-sm" />
+          <BoardLogo className="text-sm sm:text-lg" />
         </Link>
 
-        <span className="pixel-corners border-2 border-edge bg-surface px-2 py-1 font-pixel text-[8px] text-parchment sm:px-2.5 sm:py-1.5 sm:text-[9px]">
+        <span className="rounded-full border-[3px] border-void bg-cream px-2.5 py-1 font-pixel text-xs font-bold text-parchment sm:px-3 sm:py-1.5 sm:text-sm">
           {roomId}
         </span>
 
@@ -56,7 +56,7 @@ export function RoomHeader({
 
         <Link
           href="/lobby"
-          className="pixel-corners flex items-center gap-1.5 border-2 border-edge px-2 py-1 font-pixel text-[8px] uppercase text-muted transition-colors hover:border-danger/50 hover:text-danger sm:gap-2 sm:px-3 sm:py-1.5 sm:text-[9px]"
+          className="flex items-center gap-1.5 rounded-full border-[3px] border-void bg-cream px-2.5 py-1 font-pixel text-xs font-bold uppercase text-muted transition-colors hover:bg-danger hover:text-cream sm:gap-2 sm:px-3 sm:py-1.5 sm:text-sm"
         >
           <LogOut className="size-3" aria-hidden />
           <span className="hidden sm:inline">Leave</span>

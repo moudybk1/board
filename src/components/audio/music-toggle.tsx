@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Music2, Music } from "lucide-react";
 
 import { audioManager, unlockAudio } from "@/lib/audio/audio-manager";
@@ -11,7 +11,11 @@ import { cn } from "@/lib/utils";
  * (see AudioUnlock) when music is enabled.
  */
 export function MusicToggle({ className }: { className?: string }) {
-  const [muted, setMuted] = useState(() => audioManager.isMusicMuted());
+  const [muted, setMuted] = useState(false);
+
+  useEffect(() => {
+    setMuted(audioManager.isMusicMuted());
+  }, []);
 
   return (
     <button
@@ -19,7 +23,7 @@ export function MusicToggle({ className }: { className?: string }) {
       aria-label={muted ? "Unmute music" : "Mute music"}
       aria-pressed={muted}
       className={cn(
-        "pixel-corners grid size-8 place-items-center border-2 border-edge bg-surface text-muted transition-colors hover:border-edge-bright hover:text-parchment sm:size-9",
+        "grid size-8 place-items-center rounded-full border-[3px] border-void bg-cream text-muted shadow-pixel-sm transition-colors hover:bg-gold hover:text-void sm:size-9",
         className,
       )}
       onClick={() => {

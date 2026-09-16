@@ -8,7 +8,7 @@ import type { WalletBalance } from "@/lib/types";
 import { cn, formatBoard } from "@/lib/utils";
 
 function shortAddress(address: string) {
-  if (!address || address.length < 10) return "—";
+  if (!address || address.length < 10) return "...";
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
 
@@ -32,7 +32,7 @@ export function BalanceStrip({
   return (
     <section
       className={cn(
-        "relative overflow-hidden border-2 border-gold/50 bg-void/70 shadow-pixel-gold",
+        "relative overflow-hidden rounded-[1.5rem] border-[3px] border-void bg-gold shadow-pixel",
         className,
       )}
     >
@@ -52,7 +52,7 @@ export function BalanceStrip({
         <BoardAmount
           value={balance.available}
           size="xl"
-          tone="gold"
+          tone="default"
           className="mt-3"
         />
         {!PLAY_IS_LIVE ? (
@@ -80,7 +80,7 @@ export function BalanceStrip({
               <Link2 className="size-3" aria-hidden />
               {balance.chain}
             </PixelBadge>
-            <p className="mt-2 font-mono text-[10px] text-faint">
+            <p className="mt-2 font-pixel text-xs text-faint">
               {shortAddress(balance.address)}
             </p>
           </div>

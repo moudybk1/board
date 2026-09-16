@@ -300,7 +300,7 @@ function HeroDieFace({
       />
       <div
         data-die={which}
-        className="pixel-corners relative grid size-32 grid-cols-3 grid-rows-3 gap-2 border-[5px] border-void bg-parchment p-2.5 shadow-pixel-lg sm:size-40 sm:gap-2.5 sm:border-[6px] sm:p-3 lg:size-52 lg:gap-3 lg:border-[7px] lg:p-3.5"
+        className="relative grid size-32 grid-cols-3 grid-rows-3 gap-2 rounded-[1.6rem] border-[5px] border-void bg-cream p-2.5 shadow-pixel-lg sm:size-40 sm:gap-2.5 sm:border-[6px] sm:p-3 lg:size-52 lg:gap-3 lg:border-[7px] lg:p-3.5"
         style={{ transformOrigin: "50% 85%" }}
       >
         <span className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-white/40" />
@@ -309,7 +309,7 @@ function HeroDieFace({
           <span
             key={cell}
             className={cn(
-              "rounded-none",
+              "rounded-full",
               pips.includes(cell) ? "bg-void" : "bg-transparent",
             )}
           />

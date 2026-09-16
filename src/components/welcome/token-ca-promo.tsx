@@ -44,16 +44,16 @@ export function TokenCaPromo({
     return (
       <aside
         aria-labelledby="token-ca-title"
-        className={cn("border-t-2 border-edge pt-4", className)}
+        className={cn("border-t-[3px] border-void pt-4", className)}
       >
         <div className="flex items-baseline justify-between gap-3">
           <p
             id="token-ca-title"
-            className="font-pixel text-[8px] uppercase tracking-[0.18em] text-gold"
+            className="font-pixel text-[11px] font-bold uppercase tracking-wide text-gold-deep"
           >
             Token CA
           </p>
-          <p className="font-pixel text-[7px] uppercase tracking-wider text-faint">
+          <p className="font-pixel text-[11px] font-bold uppercase tracking-wide text-faint">
             {chainLabel}
           </p>
         </div>
@@ -61,7 +61,7 @@ export function TokenCaPromo({
         {address ? (
           <>
             <p
-              className="mt-2 break-all font-pixel text-[8px] leading-relaxed text-parchment sm:text-[9px]"
+              className="mt-2 break-all font-pixel text-xs leading-relaxed text-parchment sm:text-sm"
               title={address}
             >
               <span className="sm:hidden">{shortenAddress(address, 6)}</span>
@@ -98,7 +98,7 @@ export function TokenCaPromo({
           </>
         ) : (
           <p className="mt-2 font-pixel text-[8px] leading-relaxed text-muted sm:text-[9px]">
-            CA soon — verify here before you trade.
+            CA soon - verify here before you trade.
           </p>
         )}
       </aside>

@@ -50,14 +50,14 @@ export function DiceTray({
       <div aria-live="polite" className="min-w-14">
         {total !== null && (
           <>
-            <p className="font-pixel text-[8px] uppercase text-faint">Rolled</p>
-            <p className="font-pixel text-sm text-gold text-shadow-pixel">
+            <p className="font-pixel text-xs font-bold uppercase text-faint">Rolled</p>
+            <p className="font-pixel text-lg font-bold text-gold-deep">
               {total}
             </p>
           </>
         )}
         {rolling && (
-          <p className="font-pixel text-[9px] uppercase text-muted animate-pulse-glow">
+          <p className="font-pixel text-xs font-bold uppercase text-muted animate-pulse-glow">
             Rolling…
           </p>
         )}
@@ -99,14 +99,14 @@ export function DieTray({
       <div aria-live="polite" className="min-w-14">
         {!rolling && value !== null && (
           <>
-            <p className="font-pixel text-[8px] uppercase text-faint">Rolled</p>
-            <p className="font-pixel text-sm text-ludo text-shadow-pixel">
+            <p className="font-pixel text-xs font-bold uppercase text-faint">Rolled</p>
+            <p className="font-pixel text-lg font-bold text-ludo">
               {value}
             </p>
           </>
         )}
         {rolling && (
-          <p className="font-pixel text-[9px] uppercase text-muted animate-pulse-glow">
+          <p className="font-pixel text-xs font-bold uppercase text-muted animate-pulse-glow">
             Rolling…
           </p>
         )}
@@ -194,13 +194,13 @@ function Die({
       ref={ref}
       role="img"
       aria-label={`Die showing ${face}`}
-      className="pixel-corners grid size-11 shrink-0 grid-cols-3 grid-rows-3 gap-[3px] border-2 border-void bg-parchment p-[5px] shadow-pixel-sm"
+      className="grid size-11 shrink-0 grid-cols-3 grid-rows-3 gap-[3px] rounded-[0.85rem] border-[3px] border-void bg-cream p-[5px] shadow-pixel-sm"
     >
       {Array.from({ length: 9 }, (_, cell) => (
         <span
           key={cell}
           className={cn(
-            "rounded-none",
+            "rounded-full",
             pips.includes(cell) ? "bg-void" : "bg-transparent",
           )}
         />

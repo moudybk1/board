@@ -12,7 +12,7 @@ type PageHeroProps = {
 };
 
 /**
- * Product page hero — asymmetric playfield header, optional eyebrow.
+ * Product page hero — sticker header on the felt table.
  */
 export function PageHero({
   eyebrow,
@@ -27,7 +27,7 @@ export function PageHero({
     <header
       data-reveal
       className={cn(
-        "relative isolate overflow-hidden border-2 border-edge-bright bg-void/40 pixel-inset",
+        "relative isolate overflow-hidden rounded-[1.75rem] border-[4px] border-void bg-cream shadow-pixel-lg",
         className,
       )}
     >
@@ -36,26 +36,10 @@ export function PageHero({
         className="pointer-events-none absolute inset-0 opacity-90"
         style={{
           backgroundImage: `
-            radial-gradient(ellipse 75% 90% at 100% 0%, color-mix(in srgb, var(--color-gold) 16%, transparent), transparent 55%),
-            radial-gradient(ellipse 50% 70% at 0% 100%, color-mix(in srgb, var(--color-monopoly) 10%, transparent), transparent 60%),
-            linear-gradient(135deg, transparent 40%, color-mix(in srgb, var(--color-void) 35%, transparent) 100%)
+            radial-gradient(ellipse 75% 90% at 100% 0%, color-mix(in srgb, var(--color-gold) 42%, transparent), transparent 55%),
+            radial-gradient(ellipse 50% 70% at 0% 100%, color-mix(in srgb, var(--color-monopoly) 22%, transparent), transparent 60%)
           `,
         }}
-      />
-      {/* Felt diamond hint inside the hero only */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.07]"
-        style={{
-          backgroundImage: `
-            repeating-linear-gradient(45deg, transparent 0 14px, rgba(108,255,159,0.35) 14px 15px),
-            repeating-linear-gradient(-45deg, transparent 0 14px, rgba(0,0,0,0.35) 14px 15px)
-          `,
-        }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-transparent via-gold to-transparent"
       />
 
       <div
@@ -67,19 +51,19 @@ export function PageHero({
       >
         <div className="min-w-0">
           {eyebrow ? (
-            <p className="font-pixel text-[9px] uppercase tracking-[0.2em] text-gold">
+            <p className="font-pixel text-xs font-bold uppercase tracking-wide text-gold-deep">
               {eyebrow}
             </p>
           ) : null}
           <h1
             className={cn(
-              "max-w-xl font-pixel text-pixel-fluid-lg leading-[1.35] text-parchment text-shadow-pixel",
+              "max-w-xl font-pixel text-pixel-fluid-lg font-bold leading-[1.15] tracking-tight text-parchment",
               eyebrow ? "mt-3" : "mt-0",
             )}
           >
             {title}
           </h1>
-          <p className="mt-4 max-w-[36rem] text-sm leading-relaxed text-muted">
+          <p className="mt-4 max-w-[36rem] text-base leading-relaxed text-muted">
             {support}
           </p>
           {meta ? (
@@ -110,15 +94,19 @@ export function HeroStat({
   pulse?: boolean;
 }) {
   return (
-    <span className="inline-flex items-center gap-2 border-2 border-edge bg-ink/90 px-3 py-2 shadow-pixel-sm">
+    <span className="inline-flex items-center gap-2 rounded-full border-[3px] border-void bg-surface px-3 py-1.5 shadow-pixel-sm">
       {pulse ? (
         <i
-          className="size-1.5 shrink-0 bg-success animate-pulse-glow"
+          className="size-2 shrink-0 rounded-full bg-success animate-pulse-glow"
           aria-hidden
         />
       ) : null}
-      <span className="font-pixel text-[8px] uppercase text-faint">{label}</span>
-      <span className="font-pixel text-[9px] text-parchment">{value}</span>
+      <span className="font-pixel text-xs font-bold uppercase text-faint">
+        {label}
+      </span>
+      <span className="font-pixel text-sm font-bold text-parchment">
+        {value}
+      </span>
     </span>
   );
 }

@@ -37,13 +37,13 @@ export function BalanceWidget({
     return (
       <div
         className={cn(
-          "pixel-corners inline-flex items-center gap-2 border-2 border-gold/50 bg-gold/10 px-3 py-2",
+          "pixel-corners inline-flex items-center gap-2 border-[3px] border-void bg-gold px-3 py-2",
           className,
         )}
         title="BOARD available"
       >
-        <Wallet className="size-3.5 text-gold" aria-hidden />
-        <BoardAmount value={resolved.available} size="sm" tone="gold" compact />
+        <Wallet className="size-3.5 text-void" aria-hidden />
+        <BoardAmount value={resolved.available} size="sm" tone="default" compact />
         <span className="sr-only">BOARD available</span>
       </div>
     );
@@ -52,11 +52,11 @@ export function BalanceWidget({
   return (
     <div
       className={cn(
-        "pixel-corners border-2 border-gold/50 bg-gold/5 p-4 shadow-pixel-sm",
+        "pixel-corners border-[3px] border-void bg-cream p-4 shadow-pixel-sm",
         className,
       )}
     >
-      <p className="font-pixel text-[8px] uppercase tracking-widest text-faint">
+      <p className="font-pixel text-xs font-bold uppercase tracking-wide text-faint">
         BOARD balance
       </p>
       <div className="mt-2">

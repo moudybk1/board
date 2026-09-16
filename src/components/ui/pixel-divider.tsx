@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Hard 2px rule used between panel sections · never a soft hairline.
+ * Chunky rule used between panel sections.
  */
 export function PixelDivider({
   className,
@@ -15,18 +15,18 @@ export function PixelDivider({
         role="separator"
         {...props}
       >
-        <span className="h-0.5 flex-1 bg-edge" />
-        <span className="font-pixel text-[8px] uppercase text-faint">
+        <span className="h-1 flex-1 rounded-full bg-void/20" />
+        <span className="font-pixel text-xs font-bold uppercase text-faint">
           {label}
         </span>
-        <span className="h-0.5 flex-1 bg-edge" />
+        <span className="h-1 flex-1 rounded-full bg-void/20" />
       </div>
     );
   }
 
   return (
     <div
-      className={cn("h-0.5 w-full bg-edge", className)}
+      className={cn("h-1 w-full rounded-full bg-void/20", className)}
       role="separator"
       {...props}
     />

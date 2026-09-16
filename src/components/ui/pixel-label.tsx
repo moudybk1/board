@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Uppercase pixel label for form fields and chrome captions.
+ * Uppercase cartoon label for form fields and chrome captions.
  */
 export function PixelLabel({
   className,
@@ -10,7 +10,7 @@ export function PixelLabel({
   return (
     <span
       className={cn(
-        "font-pixel text-[9px] uppercase tracking-wide text-muted",
+        "font-pixel text-xs font-bold uppercase tracking-wide text-muted",
         className,
       )}
       {...props}
@@ -19,7 +19,7 @@ export function PixelLabel({
 }
 
 /**
- * Display heading in Press Start · keep short; the whole UI is pixel type.
+ * Display heading in Fredoka · keep lines short on small screens.
  */
 export function PixelHeading({
   as: Tag = "h2",
@@ -31,16 +31,16 @@ export function PixelHeading({
   size?: "sm" | "md" | "lg" | "xl";
 }) {
   const sizes = {
-    sm: "text-[10px]",
-    md: "text-[12px]",
-    lg: "text-sm sm:text-base",
-    xl: "text-base sm:text-xl",
+    sm: "text-lg",
+    md: "text-xl sm:text-2xl",
+    lg: "text-2xl sm:text-3xl",
+    xl: "text-3xl sm:text-5xl",
   } as const;
 
   return (
     <Tag
       className={cn(
-        "font-pixel uppercase text-parchment text-shadow-pixel",
+        "font-pixel font-bold uppercase tracking-tight text-parchment",
         sizes[size],
         className,
       )}

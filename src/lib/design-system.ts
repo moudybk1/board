@@ -3,22 +3,24 @@
  * Prefer Tailwind theme classes in JSX; use these for JS/canvas/GSAP.
  */
 export const boardColors = {
-  void: "#050706",
-  ink: "#0a0e0c",
-  surface: "#121816",
-  surfaceRaised: "#1a211e",
-  edge: "#2a3530",
-  edgeBright: "#3d4d45",
-  parchment: "#e6ebe7",
-  muted: "#8b978f",
-  faint: "#5c675f",
-  /** Brand phosphor (token still named gold for class compatibility). */
-  gold: "#6cff9f",
-  goldDeep: "#2f9a5a",
-  monopoly: "#3ec9b0",
-  ludo: "#ff7a59",
-  danger: "#ff6b6b",
-  success: "#6cff9f",
+  void: "#2d170c",
+  ink: "#fff4c4",
+  surface: "#fffaf1",
+  surfaceRaised: "#fff6de",
+  edge: "#2d170c",
+  edgeBright: "#6b3a14",
+  parchment: "#2d170c",
+  muted: "#7a4e2a",
+  faint: "#8d5a32",
+  cream: "#fff8e4",
+  felt: "#2ecf7a",
+  /** Brand lemon (token still named gold for class compatibility). */
+  gold: "#ffd23a",
+  goldDeep: "#c45a00",
+  monopoly: "#1298c9",
+  ludo: "#e83f86",
+  danger: "#e23b3b",
+  success: "#1a9f4b",
 } as const;
 
 export const boardSpacing = {
