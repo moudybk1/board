@@ -1,33 +1,33 @@
 import { NextResponse } from "next/server";
 
-import { resolveRequestUser } from "@/server/lib/resolve-user";
 import {
-  getProfile,
-  ProfileError,
-  updateProfile,
-} from "@/server/services/profile.service";
+  errorResponse,
+  readJsonBody,
+  readOptionalString,
+} from "@/server/lib/api-response";
+import { requireUser } from "@/server/lib/require-user";
+import { getProfile, updateProfile } from "@/server/services/profile.service";
+
+/** GET /api/account/profile · current player profile. */
+export async function GET(request: Request) {
+  try {
+    const { userId } = await requireUser(request);
+    return NextResponse.json(await getProfile(userId));
+  } catch (error) {
+    return errorResponse(error, "GET /api/account/profile");
+  }
+}
 
 /**
- * GET /api/account/profile · current player profile.
+ * Explicit null clears the avatar, a string sets it, and an absent key leaves
+ * it untouched. `readOptionalString` cannot express the clear, so it is read
+ * directly here.
  */
-export async function GET(request: Request) {
-  const { userId } = await resolveRequestUser(request);
-  try {
-    const result = await getProfile(userId);
-    return NextResponse.json(result);
-  } catch (error) {
-    if (error instanceof ProfileError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.status },
-      );
-    }
-    console.error("[GET /api/account/profile]", error);
-    return NextResponse.json(
-      { error: "Failed to load profile." },
-      { status: 500 },
-    );
-  }
+function readAvatarUrl(body: unknown): string | null | undefined {
+  if (typeof body !== "object" || body === null) return undefined;
+  const raw = (body as Record<string, unknown>).avatarUrl;
+  if (raw === null) return null;
+  return typeof raw === "string" ? raw : undefined;
 }
 
 /**
@@ -36,45 +36,18 @@ export async function GET(request: Request) {
  * Body: `{ username?: string, avatarId?: string, avatarUrl?: string | null }`
  */
 export async function PATCH(request: Request) {
-  const { userId } = await resolveRequestUser(request);
-
-  let body: unknown;
   try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
-  }
+    const { userId } = await requireUser(request);
+    const body = await readJsonBody(request);
 
-  if (!body || typeof body !== "object") {
-    return NextResponse.json({ error: "Invalid body." }, { status: 400 });
-  }
-
-  const raw = body as Record<string, unknown>;
-
-  try {
     const result = await updateProfile({
       userId,
-      username: typeof raw.username === "string" ? raw.username : undefined,
-      avatarId: typeof raw.avatarId === "string" ? raw.avatarId : undefined,
-      avatarUrl:
-        raw.avatarUrl === null
-          ? null
-          : typeof raw.avatarUrl === "string"
-            ? raw.avatarUrl
-            : undefined,
+      username: readOptionalString(body, "username"),
+      avatarId: readOptionalString(body, "avatarId"),
+      avatarUrl: readAvatarUrl(body),
     });
     return NextResponse.json(result);
   } catch (error) {
-    if (error instanceof ProfileError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.status },
-      );
-    }
-    console.error("[PATCH /api/account/profile]", error);
-    return NextResponse.json(
-      { error: "Failed to update profile." },
-      { status: 500 },
-    );
+    return errorResponse(error, "PATCH /api/account/profile");
   }
 }

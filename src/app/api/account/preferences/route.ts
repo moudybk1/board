@@ -1,34 +1,43 @@
 import { NextResponse } from "next/server";
 
-import { resolveRequestUser } from "@/server/lib/resolve-user";
+import {
+  errorResponse,
+  readJsonBody,
+  readOptionalBoolean,
+  readOptionalNumber,
+} from "@/server/lib/api-response";
+import { requireUser } from "@/server/lib/require-user";
 import {
   getPreferences,
-  PreferencesError,
   updatePreferences,
   type PreferencesPatch,
 } from "@/server/services/preferences.service";
 
-/**
- * GET /api/account/preferences · load (or create defaults for) display/audio prefs.
- */
+/** GET /api/account/preferences · load (or default) display and audio prefs. */
 export async function GET(request: Request) {
-  const { userId } = await resolveRequestUser(request);
   try {
-    const result = await getPreferences(userId);
-    return NextResponse.json(result);
+    const { userId } = await requireUser(request);
+    return NextResponse.json(await getPreferences(userId));
   } catch (error) {
-    if (error instanceof PreferencesError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.status },
-      );
-    }
-    console.error("[GET /api/account/preferences]", error);
-    return NextResponse.json(
-      { error: "Failed to load preferences." },
-      { status: 500 },
-    );
+    return errorResponse(error, "GET /api/account/preferences");
   }
+}
+
+/**
+ * Build a patch from an unvalidated body. Each reader returns undefined for an
+ * absent key and rejects a present key of the wrong type, so a string "false"
+ * is a 400 rather than a silently truthy value.
+ */
+function readPreferencesPatch(body: unknown): PreferencesPatch {
+  return {
+    sfxMuted: readOptionalBoolean(body, "sfxMuted"),
+    musicMuted: readOptionalBoolean(body, "musicMuted"),
+    musicAutoplay: readOptionalBoolean(body, "musicAutoplay"),
+    reducedMotion: readOptionalBoolean(body, "reducedMotion"),
+    scanlines: readOptionalBoolean(body, "scanlines"),
+    sfxVolume: readOptionalNumber(body, "sfxVolume"),
+    musicVolume: readOptionalNumber(body, "musicVolume"),
+  };
 }
 
 /**
@@ -38,46 +47,11 @@ export async function GET(request: Request) {
  * musicVolume (0-1), musicAutoplay, reducedMotion, scanlines.
  */
 export async function PATCH(request: Request) {
-  const { userId } = await resolveRequestUser(request);
-
-  let body: unknown;
   try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
-  }
-
-  if (!body || typeof body !== "object") {
-    return NextResponse.json({ error: "Invalid body." }, { status: 400 });
-  }
-
-  const raw = body as Record<string, unknown>;
-  const patch: PreferencesPatch = {};
-
-  if ("sfxMuted" in raw) patch.sfxMuted = raw.sfxMuted as boolean;
-  if ("musicMuted" in raw) patch.musicMuted = raw.musicMuted as boolean;
-  if ("musicAutoplay" in raw)
-    patch.musicAutoplay = raw.musicAutoplay as boolean;
-  if ("reducedMotion" in raw)
-    patch.reducedMotion = raw.reducedMotion as boolean;
-  if ("scanlines" in raw) patch.scanlines = raw.scanlines as boolean;
-  if ("sfxVolume" in raw) patch.sfxVolume = Number(raw.sfxVolume);
-  if ("musicVolume" in raw) patch.musicVolume = Number(raw.musicVolume);
-
-  try {
-    const result = await updatePreferences({ userId, patch });
-    return NextResponse.json(result);
+    const { userId } = await requireUser(request);
+    const patch = readPreferencesPatch(await readJsonBody(request));
+    return NextResponse.json(await updatePreferences({ userId, patch }));
   } catch (error) {
-    if (error instanceof PreferencesError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.status },
-      );
-    }
-    console.error("[PATCH /api/account/preferences]", error);
-    return NextResponse.json(
-      { error: "Failed to update preferences." },
-      { status: 500 },
-    );
+    return errorResponse(error, "PATCH /api/account/preferences");
   }
 }

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { errorResponse, failureResponse } from "@/server/lib/api-response";
+import { requireUser } from "@/server/lib/require-user";
 import { settleLudoWinner } from "@/server/services/ludo-settle.service";
 
 type RouteContext = {
@@ -7,27 +9,21 @@ type RouteContext = {
 };
 
 /**
- * POST /api/ludo/rooms/[roomId]/settle · pay net prize to the finished winner.
+ * POST /api/ludo/rooms/[roomId]/settle · pay the net prize to the winner.
  *
- * Requires one player with all four pawns finished. Applies the 2% fee and
- * credits the winner's platform BOARD balance.
+ * Requires one player with all four pawns finished, and a caller seated in
+ * that match. Applies the fee and credits the winner's platform balance.
  */
-export async function POST(_request: Request, context: RouteContext) {
+export async function POST(request: Request, context: RouteContext) {
   const { roomId } = await context.params;
   if (!roomId) {
     return NextResponse.json({ error: "Missing room id." }, { status: 400 });
   }
 
   try {
-    const result = await settleLudoWinner(roomId);
-
-    if (!result.ok) {
-      const status = result.code === "NOT_FOUND" ? 404 : 409;
-      return NextResponse.json(
-        { error: result.message, code: result.code },
-        { status },
-      );
-    }
+    const { userId } = await requireUser(request);
+    const result = await settleLudoWinner(roomId, userId);
+    if (!result.ok) return failureResponse(result);
 
     return NextResponse.json({
       winnerUserId: result.winnerUserId,
@@ -41,10 +37,6 @@ export async function POST(_request: Request, context: RouteContext) {
       source: result.source,
     });
   } catch (error) {
-    console.error("[POST /api/ludo/rooms/:roomId/settle]", error);
-    return NextResponse.json(
-      { error: "Failed to settle Ludo match." },
-      { status: 500 },
-    );
+    return errorResponse(error, "POST /api/ludo/rooms/:roomId/settle");
   }
 }

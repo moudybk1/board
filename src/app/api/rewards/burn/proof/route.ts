@@ -1,50 +1,40 @@
 import { NextResponse } from "next/server";
 
+import {
+  errorResponse,
+  InvalidBodyError,
+  readJsonBody,
+  readOptionalString,
+} from "@/server/lib/api-response";
+import { assertServiceSecret } from "@/server/lib/service-auth";
 import { attachBurnProof } from "@/server/services/burn.service";
 
 /**
- * POST /api/rewards/burn/proof · attach on-chain burn tx hash / proof URI
- * to a fee_ledger burn row (mock-friendly until RPC watcher lands).
+ * POST /api/rewards/burn/proof · attach an on-chain burn tx hash / proof URI
+ * to a fee_ledger burn row.
  *
- * Body: `{ feeLedgerId: string, txHash: string, proofUri?: string }`
+ * These rows back the public burn claim, so the endpoint is authenticated with
+ * the shared service secret. Body:
+ * `{ feeLedgerId: string, txHash: string, proofUri?: string }`
  */
 export async function POST(request: Request) {
-  let body: unknown;
   try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
-  }
+    assertServiceSecret(request);
+    const body = await readJsonBody(request);
 
-  if (
-    !body ||
-    typeof body !== "object" ||
-    typeof (body as { feeLedgerId?: unknown }).feeLedgerId !== "string" ||
-    typeof (body as { txHash?: unknown }).txHash !== "string"
-  ) {
-    return NextResponse.json(
-      { error: "feeLedgerId and txHash are required." },
-      { status: 400 },
-    );
-  }
+    const feeLedgerId = readOptionalString(body, "feeLedgerId");
+    const txHash = readOptionalString(body, "txHash");
+    if (!feeLedgerId || !txHash) {
+      throw new InvalidBodyError("feeLedgerId and txHash are required.", 400);
+    }
 
-  const proofUri =
-    typeof (body as { proofUri?: unknown }).proofUri === "string"
-      ? (body as { proofUri: string }).proofUri
-      : undefined;
-
-  try {
     const result = await attachBurnProof({
-      feeLedgerId: (body as { feeLedgerId: string }).feeLedgerId,
-      txHash: (body as { txHash: string }).txHash,
-      proofUri,
+      feeLedgerId,
+      txHash,
+      proofUri: readOptionalString(body, "proofUri"),
     });
     return NextResponse.json(result);
   } catch (error) {
-    console.error("[POST /api/rewards/burn/proof]", error);
-    return NextResponse.json(
-      { error: "Failed to attach burn proof." },
-      { status: 500 },
-    );
+    return errorResponse(error, "POST /api/rewards/burn/proof");
   }
 }

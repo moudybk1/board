@@ -1,37 +1,37 @@
 import { NextResponse } from "next/server";
 
-import { MOCK_PLAYER } from "@/lib/mock/lobby";
+import {
+  errorResponse,
+  failureResponse,
+  readJsonBody,
+} from "@/server/lib/api-response";
+import { requireUser } from "@/server/lib/require-user";
 import { moveLudoPawn } from "@/server/services/ludo-move.service";
 
 type RouteContext = {
   params: Promise<{ roomId: string }>;
 };
 
+/** Pull a non-empty `pawnId` out of an unvalidated JSON body. */
+function readPawnId(body: unknown): string | null {
+  if (typeof body !== "object" || body === null) return null;
+  const { pawnId } = body as Record<string, unknown>;
+  if (typeof pawnId !== "string") return null;
+  return pawnId.trim() || null;
+}
+
 /**
  * POST /api/ludo/rooms/[roomId]/move · move a pawn after an authoritative roll.
  *
  * Body: `{ "pawnId": "p1-0" }`
- * Auth stub: `x-user-id`.
  */
 export async function POST(request: Request, context: RouteContext) {
   const { roomId } = await context.params;
-  const userId =
-    request.headers.get("x-user-id")?.trim() || MOCK_PLAYER.id;
-
   if (!roomId) {
     return NextResponse.json({ error: "Missing room id." }, { status: 400 });
   }
 
-  let pawnId: string | undefined;
-  try {
-    const body = (await request.json()) as { pawnId?: unknown };
-    if (typeof body.pawnId === "string" && body.pawnId.trim()) {
-      pawnId = body.pawnId.trim();
-    }
-  } catch {
-    /* fall through */
-  }
-
+  const pawnId = readPawnId(await readJsonBody(request));
   if (!pawnId) {
     return NextResponse.json(
       { error: "Body must include pawnId." },
@@ -40,23 +40,9 @@ export async function POST(request: Request, context: RouteContext) {
   }
 
   try {
+    const { userId } = await requireUser(request);
     const result = await moveLudoPawn(roomId, userId, pawnId);
-
-    if (!result.ok) {
-      const status =
-        result.code === "NOT_FOUND"
-          ? 404
-          : result.code === "NOT_YOUR_TURN" || result.code === "ILLEGAL_MOVE"
-            ? 403
-            : result.code === "USER_NOT_FOUND"
-              ? 401
-              : 409;
-
-      return NextResponse.json(
-        { error: result.message, code: result.code },
-        { status },
-      );
-    }
+    if (!result.ok) return failureResponse(result);
 
     return NextResponse.json({
       pawnId: result.pawnId,
@@ -69,10 +55,6 @@ export async function POST(request: Request, context: RouteContext) {
       source: result.source,
     });
   } catch (error) {
-    console.error("[POST /api/ludo/rooms/:roomId/move]", error);
-    return NextResponse.json(
-      { error: "Failed to move pawn." },
-      { status: 500 },
-    );
+    return errorResponse(error, "POST /api/ludo/rooms/:roomId/move");
   }
 }

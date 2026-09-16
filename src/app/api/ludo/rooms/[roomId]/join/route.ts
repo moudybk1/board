@@ -1,52 +1,28 @@
 import { NextResponse } from "next/server";
 
-import { MOCK_PLAYER } from "@/lib/mock/lobby";
-import { joinRoom } from "@/server/services/join-room.service";
+import { errorResponse, failureResponse } from "@/server/lib/api-response";
+import { requireUser } from "@/server/lib/require-user";
 import { publishLudo } from "@/server/realtime/ludo-hub";
+import { joinRoom } from "@/server/services/join-room.service";
 
 type RouteContext = {
   params: Promise<{ roomId: string }>;
 };
 
-/**
- * POST /api/ludo/rooms/[roomId]/join · Ludo join (defers kickoff until ready).
- */
+/** POST /api/ludo/rooms/[roomId]/join · Ludo join (defers kickoff until ready). */
 export async function POST(request: Request, context: RouteContext) {
   const { roomId } = await context.params;
-  const userId =
-    request.headers.get("x-user-id")?.trim() || MOCK_PLAYER.id;
-
   if (!roomId) {
     return NextResponse.json({ error: "Missing room id." }, { status: 400 });
   }
 
   try {
+    const { userId } = await requireUser(request);
     const result = await joinRoom(roomId, userId, {
       requireGame: "ludo",
       deferStart: true,
     });
-
-    if (!result.ok) {
-      const status =
-        result.code === "NOT_FOUND"
-          ? 404
-          : result.code === "INSUFFICIENT_BALANCE"
-            ? 402
-            : result.code === "USER_NOT_FOUND"
-              ? 401
-              : result.code === "WRONG_GAME"
-                ? 400
-                : 409;
-
-      return NextResponse.json(
-        {
-          error: result.message,
-          code: result.code,
-          shortfall: result.shortfall,
-        },
-        { status },
-      );
-    }
+    if (!result.ok) return failureResponse(result);
 
     publishLudo({
       type: "action",
@@ -68,10 +44,6 @@ export async function POST(request: Request, context: RouteContext) {
       source: result.source,
     });
   } catch (error) {
-    console.error("[POST /api/ludo/rooms/:roomId/join]", error);
-    return NextResponse.json(
-      { error: "Failed to join Ludo room." },
-      { status: 500 },
-    );
+    return errorResponse(error, "POST /api/ludo/rooms/:roomId/join");
   }
 }
