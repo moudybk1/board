@@ -16,6 +16,7 @@ import {
 } from "@/lib/game/monopoly-board";
 import { pawnSprite } from "@/lib/game/pawn-sprite";
 import { prefersReducedMotion } from "@/lib/motion/gsap-config";
+import { playWhileVisible } from "@/lib/motion/play-while-visible";
 import { cn } from "@/lib/utils";
 
 /** Group bar faces the board center, same as the live table. */
@@ -250,7 +251,10 @@ export function WelcomeStage({ className }: { className?: string }) {
     stage.addEventListener("hero-dice-settle", onRoll);
     window.addEventListener("resize", onResize);
 
+    const stopVisibilityGate = playWhileVisible(stage, () => tweens);
+
     return () => {
+      stopVisibilityGate();
       stage.removeEventListener("hero-dice-settle", onRoll);
       window.removeEventListener("resize", onResize);
       tweens.forEach((t) => t.kill());

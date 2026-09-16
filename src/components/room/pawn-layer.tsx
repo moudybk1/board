@@ -68,8 +68,13 @@ function Pawn({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const introDone = useRef(false);
+  // Latest callback, read by the GSAP timeline without re-running it. Written
+  // in an effect: assigning a ref during render is not safe under concurrent
+  // rendering, where a render can be discarded.
   const completeRef = useRef(onMoveComplete);
-  completeRef.current = onMoveComplete;
+  useEffect(() => {
+    completeRef.current = onMoveComplete;
+  }, [onMoveComplete]);
 
   const color = seatColor(pawn.seat);
   const parked = pawnPoint(pawn.tile, pawn.seat);

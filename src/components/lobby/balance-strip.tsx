@@ -1,4 +1,4 @@
-import { Link2, Lock, Sparkles } from "lucide-react";
+import { Link2, Lock } from "lucide-react";
 
 import { BoardAmount } from "@/components/ui/board-amount";
 import { PixelBadge } from "@/components/ui/pixel-badge";
@@ -38,10 +38,7 @@ export function BalanceStrip({
       <div className="relative p-5 sm:p-6">
         <div className="flex flex-wrap items-center gap-2">
           <PixelLabel className="text-gold/80">Available to stake</PixelLabel>
-          <PixelBadge tone="gold">
-            <Sparkles className="size-3" aria-hidden />
-            Ready
-          </PixelBadge>
+          <PixelBadge tone="gold">Ready</PixelBadge>
         </div>
         <BoardAmount
           value={balance.available}

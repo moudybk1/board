@@ -113,7 +113,7 @@ export function GameCard({
               selected ? "text-gold" : "text-faint group-hover:text-parchment",
             )}
           >
-            {selected ? "Tables below ↓" : "Select →"}
+            {selected ? "Tables below" : "Select"}
           </span>
         </div>
       </div>
