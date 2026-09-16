@@ -7,10 +7,7 @@ import { MOCK_ACCOUNT } from "@/lib/mock/account";
 import { MOCK_PLAYER } from "@/lib/mock/lobby";
 import { getDb } from "@/server/db";
 import { users } from "@/server/db/schema";
-
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
 
 const AVATAR_IDS = new Set([
   "pawn-gold",

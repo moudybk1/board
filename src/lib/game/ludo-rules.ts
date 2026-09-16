@@ -39,10 +39,6 @@ export type MovePreview = {
 
 type Occupant = { seat: number; pawnId: string };
 
-function cellKey(row: number, col: number) {
-  return `${row}:${col}`;
-}
-
 function isSafeCell(row: number, col: number) {
   return SAFE_CELLS.some(([r, c]) => r === row && c === col);
 }

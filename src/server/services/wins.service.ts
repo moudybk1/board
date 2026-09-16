@@ -1,13 +1,9 @@
 import { desc, eq } from "drizzle-orm";
 
-import { MOCK_PLAYER } from "@/lib/mock/lobby";
 import { MOCK_WIN_HISTORY, MOCK_WIN_RESULT } from "@/lib/mock/wins";
 import { getDb } from "@/server/db";
 import { rewardPayouts, users } from "@/server/db/schema";
-
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
 
 function mapMock(win: typeof MOCK_WIN_RESULT) {
   return {

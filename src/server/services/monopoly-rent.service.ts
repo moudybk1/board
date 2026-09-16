@@ -12,12 +12,16 @@ import {
   monopolyMatches,
   monopolyPlayers,
   monopolyProperties,
-  rooms,
   users,
 } from "@/server/db/schema";
 import { MOCK_MONOPOLY_LIVE } from "@/server/services/join-room.service";
 import { broadcastMonopolyAction } from "@/server/services/monopoly-sync.service";
 import { maybeSettleAfterRent } from "@/server/services/monopoly-settle.service";
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
+import {
+  findRoomByRef,
+  formatRoomCode,
+} from "@/server/db/repositories/rooms.repository";
 
 export type MonopolyRentResult =
   | {
@@ -44,10 +48,6 @@ export type MonopolyRentResult =
       message: string;
     };
 
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
-
 /**
  * Charge rent when a player lands on an opponent's country. Pays what they
  * can; if they cannot cover the full rent (or cash hits 0) they are eliminated.
@@ -63,12 +63,7 @@ export async function settleMonopolyRent(
 
   const db = getDb();
   const result = await db.transaction(async (tx) => {
-    const roomRows = await tx.select().from(rooms);
-    const room = roomRows.find(
-      (row) =>
-        row.id === roomRef ||
-        formatRoomCode(row.id, row.gameType) === roomRef.toUpperCase(),
-    );
+    const room = await findRoomByRef(tx, roomRef);
     if (!room || room.gameType !== "monopoly") {
       return {
         ok: false as const,
@@ -486,8 +481,3 @@ function settleRentMock(
   return payload;
 }
 
-function formatRoomCode(id: string, gameType: "monopoly" | "ludo") {
-  const prefix = gameType === "monopoly" ? "MNP" : "LUD";
-  const short = id.replace(/-/g, "").slice(0, 4).toUpperCase();
-  return `${prefix}-${short}`;
-}

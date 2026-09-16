@@ -1,18 +1,15 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
-import { MOCK_BALANCE, MOCK_PLAYER } from "@/lib/mock/lobby";
 import { getDb } from "@/server/db";
-import { transactions, userBalances, users } from "@/server/db/schema";
+import { transactions } from "@/server/db/schema";
 import {
   DepositError,
   getMockPendingDeposit,
   upsertMockDeposit,
   type DepositResult,
 } from "@/server/services/deposit.service";
-
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
+import { applyBalanceDelta } from "@/server/db/repositories/balances.repository";
 
 export type ConfirmDepositInput = {
   transactionId: string;
@@ -49,13 +46,8 @@ export async function confirmDeposit(
     };
     upsertMockDeposit(next);
 
-    if (!input.fail && (pending.id.startsWith("dep_") || true)) {
-      // Mock balance lives in MOCK_BALANCE constant · confirmation is recorded
-      // on the ledger only until a mutable mock store is needed.
-      void MOCK_PLAYER;
-      void MOCK_BALANCE;
-    }
-
+    // Mock mode records the confirmation on the ledger only; MOCK_BALANCE is a
+    // constant, so there is no mock balance to credit.
     return { transaction: next, source: "mock" };
   }
 
@@ -111,32 +103,10 @@ export async function confirmDeposit(
       .where(eq(transactions.id, row.id))
       .returning();
 
-    await tx
-      .insert(userBalances)
-      .values({
-        userId: row.userId,
-        available: amount.toFixed(2),
-        chain: row.chain,
-        walletAddress: row.walletAddress,
-        updatedAt: new Date(),
-      })
-      .onConflictDoUpdate({
-        target: userBalances.userId,
-        set: {
-          available: sql`${userBalances.available} + ${amount.toFixed(2)}`,
-          walletAddress: row.walletAddress ?? userBalances.walletAddress,
-          chain: row.chain,
-          updatedAt: new Date(),
-        },
-      });
-
-    // Keep legacy users.balance in sync for older join/settle paths.
-    await tx
-      .update(users)
-      .set({
-        balance: sql`${users.balance} + ${amount.toFixed(2)}`,
-      })
-      .where(eq(users.id, row.userId));
+    await applyBalanceDelta(tx, row.userId, amount, {
+      chain: row.chain,
+      walletAddress: row.walletAddress,
+    });
 
     return {
       transaction: mapRow(updated),

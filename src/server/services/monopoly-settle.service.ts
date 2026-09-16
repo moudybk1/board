@@ -22,6 +22,11 @@ import {
 import { MOCK_MONOPOLY_LIVE } from "@/server/services/join-room.service";
 import { broadcastMonopolyAction } from "@/server/services/monopoly-sync.service";
 import { payMatchReward } from "@/server/services/reward-payout.service";
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
+import {
+  findRoomByRef,
+  formatRoomCode,
+} from "@/server/db/repositories/rooms.repository";
 
 export type MonopolySettleResult =
   | {
@@ -38,20 +43,21 @@ export type MonopolySettleResult =
     }
   | {
       ok: false;
-      code: "NOT_FOUND" | "NOT_READY" | "ALREADY_SETTLED";
+      code: "NOT_FOUND" | "NOT_READY" | "ALREADY_SETTLED" | "FORBIDDEN";
       message: string;
     };
-
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
 
 /**
  * When one Monopoly player remains, settle the match: 2% fee, credit the
  * winner's platform balance with the net prize, mark room + match finished.
+ *
+ * `actingUserId` is the signed-in caller when settlement is triggered over
+ * HTTP. It must be someone seated in the match, so an outsider cannot drive
+ * another table's payout. Internal callers omit it.
  */
 export async function settleMonopolyWinner(
   roomRef: string,
+  actingUserId?: string,
 ): Promise<MonopolySettleResult> {
   if (!dbConfigured()) {
     return settleWinnerMock(roomRef);
@@ -59,12 +65,7 @@ export async function settleMonopolyWinner(
 
   const db = getDb();
   const result = await db.transaction(async (tx) => {
-    const roomRows = await tx.select().from(rooms);
-    const room = roomRows.find(
-      (row) =>
-        row.id === roomRef ||
-        formatRoomCode(row.id, row.gameType) === roomRef.toUpperCase(),
-    );
+    const room = await findRoomByRef(tx, roomRef);
     if (!room || room.gameType !== "monopoly") {
       return {
         ok: false as const,
@@ -108,6 +109,17 @@ export async function settleMonopolyWinner(
       .innerJoin(users, eq(users.id, monopolyPlayers.userId))
       .where(eq(monopolyPlayers.matchId, match.id))
       .orderBy(asc(monopolyPlayers.seat));
+
+    if (
+      actingUserId &&
+      !players.some((player) => player.userId === actingUserId)
+    ) {
+      return {
+        ok: false as const,
+        code: "FORBIDDEN" as const,
+        message: "Only a player in this match can settle it.",
+      };
+    }
 
     const alive = players.filter((player) => player.status === "alive");
     if (alive.length !== 1) {
@@ -329,12 +341,6 @@ function settleWinnerMock(roomRef: string): MonopolySettleResult {
     state,
     source: "mock",
   };
-}
-
-function formatRoomCode(id: string, gameType: "monopoly" | "ludo") {
-  const prefix = gameType === "monopoly" ? "MNP" : "LUD";
-  const short = id.replace(/-/g, "").slice(0, 4).toUpperCase();
-  return `${prefix}-${short}`;
 }
 
 /** Auto-settle when rent leaves a single survivor. */

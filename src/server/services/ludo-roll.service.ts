@@ -1,6 +1,7 @@
 import { asc, eq } from "drizzle-orm";
 
-import { randomDie, type DieValue } from "@/lib/game/dice";
+import { type DieValue } from "@/lib/game/dice";
+import { secureDie } from "@/server/lib/secure-dice";
 import {
   movablePawns,
   nextActiveSeat,
@@ -18,7 +19,6 @@ import {
   ludoPawns,
   ludoPlayers,
   matches,
-  rooms,
   users,
 } from "@/server/db/schema";
 import { publishLudo } from "@/server/realtime/ludo-hub";
@@ -27,6 +27,11 @@ import {
   LUDO_TURN_SECONDS,
   buildLudoState,
 } from "@/server/services/ludo-start.service";
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
+import {
+  findRoomByRef,
+  formatRoomCode,
+} from "@/server/db/repositories/rooms.repository";
 
 /** Consecutive 6s in the current turn, keyed by room / match id. */
 export const ludoSixStreak = new Map<string, number>();
@@ -62,10 +67,6 @@ export type LudoRollResult =
       message: string;
     };
 
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
-
 /**
  * Authoritative single-die roll for Ludo. Stores `lastRoll` and returns the
  * legal pawn moves so the client can pick (or auto-move when only one).
@@ -80,12 +81,7 @@ export async function rollLudo(
 
   const db = getDb();
   const result = await db.transaction(async (tx) => {
-    const roomRows = await tx.select().from(rooms);
-    const room = roomRows.find(
-      (row) =>
-        row.id === roomRef ||
-        formatRoomCode(row.id, row.gameType) === roomRef.toUpperCase(),
-    );
+    const room = await findRoomByRef(tx, roomRef);
     if (!room || room.gameType !== "ludo") {
       return {
         ok: false as const,
@@ -164,7 +160,7 @@ export async function rollLudo(
       };
     }
 
-    const roll = randomDie();
+    const roll = secureDie();
     const now = new Date();
     const turnEndsAt = new Date(now.getTime() + LUDO_TURN_SECONDS * 1000);
     const streakKey = match.id;
@@ -410,7 +406,7 @@ function rollLudoMock(roomRef: string, userId: string): LudoRollResult {
     };
   }
 
-  const roll = randomDie();
+  const roll = secureDie();
   const who = roller.isYou ? "You" : roller.username;
   const streakKey = state.roomId;
 
@@ -512,8 +508,3 @@ function rollLudoMock(roomRef: string, userId: string): LudoRollResult {
   };
 }
 
-function formatRoomCode(id: string, gameType: "monopoly" | "ludo") {
-  const prefix = gameType === "monopoly" ? "MNP" : "LUD";
-  const short = id.replace(/-/g, "").slice(0, 4).toUpperCase();
-  return `${prefix}-${short}`;
-}

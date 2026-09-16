@@ -1,4 +1,4 @@
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 
 import { MOCK_BALANCE, MOCK_PLAYER } from "@/lib/mock/lobby";
 import {
@@ -24,6 +24,11 @@ import { publishLudo } from "@/server/realtime/ludo-hub";
 import { MOCK_LUDO_LIVE } from "@/server/services/join-room.service";
 import { buildLudoState } from "@/server/services/ludo-start.service";
 import { payMatchReward } from "@/server/services/reward-payout.service";
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
+import {
+  findRoomByRef,
+  formatRoomCode,
+} from "@/server/db/repositories/rooms.repository";
 
 export type LudoSettleResult =
   | {
@@ -40,13 +45,9 @@ export type LudoSettleResult =
     }
   | {
       ok: false;
-      code: "NOT_FOUND" | "NOT_READY" | "ALREADY_SETTLED";
+      code: "NOT_FOUND" | "NOT_READY" | "ALREADY_SETTLED" | "FORBIDDEN";
       message: string;
     };
-
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
 
 /** True when every pawn for this seat is finished. */
 export function hasFinishedAllPawns(state: LudoRoomState, seat: number) {
@@ -76,9 +77,14 @@ export function detectLudoWinner(state: LudoRoomState) {
 /**
  * Settle a Ludo match once a player has finished all pawns: 2% fee, credit
  * the winner's platform balance, mark room + match finished.
+ *
+ * `actingUserId` is the signed-in caller when settlement is triggered over
+ * HTTP. It must be someone seated in the match, so an outsider cannot drive
+ * another table's payout. Internal callers omit it.
  */
 export async function settleLudoWinner(
   roomRef: string,
+  actingUserId?: string,
 ): Promise<LudoSettleResult> {
   if (!dbConfigured()) {
     return settleLudoMock(roomRef);
@@ -86,12 +92,7 @@ export async function settleLudoWinner(
 
   const db = getDb();
   const result = await db.transaction(async (tx) => {
-    const roomRows = await tx.select().from(rooms);
-    const room = roomRows.find(
-      (row) =>
-        row.id === roomRef ||
-        formatRoomCode(row.id, row.gameType) === roomRef.toUpperCase(),
-    );
+    const room = await findRoomByRef(tx, roomRef);
     if (!room || room.gameType !== "ludo") {
       return {
         ok: false as const,
@@ -133,6 +134,17 @@ export async function settleLudoWinner(
       .innerJoin(users, eq(users.id, ludoPlayers.userId))
       .where(eq(ludoPlayers.matchId, match.id))
       .orderBy(asc(ludoPlayers.seat));
+
+    if (
+      actingUserId &&
+      !players.some((player) => player.userId === actingUserId)
+    ) {
+      return {
+        ok: false as const,
+        code: "FORBIDDEN" as const,
+        message: "Only a player in this match can settle it.",
+      };
+    }
 
     const pawnRows = await tx
       .select()
@@ -207,10 +219,17 @@ export async function settleLudoWinner(
       .set({ status: "finished" })
       .where(eq(rooms.id, room.id));
 
+    // Scope to this match: without the matchId the winner would be marked
+    // finished in every other match they are currently seated in.
     await tx
       .update(ludoPlayers)
       .set({ status: "finished" })
-      .where(eq(ludoPlayers.userId, winner.userId));
+      .where(
+        and(
+          eq(ludoPlayers.matchId, match.id),
+          eq(ludoPlayers.userId, winner.userId),
+        ),
+      );
 
     await tx.insert(ludoLogs).values({
       matchId: match.id,
@@ -404,8 +423,3 @@ export async function maybeSettleAfterLudoWin(state: LudoRoomState) {
   return settleLudoWinner(state.roomId);
 }
 
-function formatRoomCode(id: string, gameType: "monopoly" | "ludo") {
-  const prefix = gameType === "monopoly" ? "MNP" : "LUD";
-  const short = id.replace(/-/g, "").slice(0, 4).toUpperCase();
-  return `${prefix}-${short}`;
-}

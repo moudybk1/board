@@ -15,6 +15,11 @@ import {
   startLudoMock,
 } from "@/server/services/ludo-start.service";
 import { MOCK_PLAYER, MOCK_ROOMS } from "@/lib/mock/lobby";
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
+import {
+  findRoomByRef,
+  formatRoomCode,
+} from "@/server/db/repositories/rooms.repository";
 
 export type ReadyRoomResult =
   | {
@@ -37,10 +42,6 @@ export type ReadyRoomResult =
       message: string;
     };
 
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
-
 /**
  * Mark the caller ready in a waiting Ludo room. When every seat is filled and
  * every seated player is ready, the match kicks off and Ludo state is seeded.
@@ -55,12 +56,7 @@ export async function readyLudoRoom(
 
   const db = getDb();
   const result = await db.transaction(async (tx) => {
-    const roomRows = await tx.select().from(rooms);
-    const room = roomRows.find(
-      (row) =>
-        row.id === roomRef ||
-        formatRoomCode(row.id, row.gameType) === roomRef.toUpperCase(),
-    );
+    const room = await findRoomByRef(tx, roomRef);
 
     if (!room || room.gameType !== "ludo") {
       return {
@@ -307,8 +303,3 @@ function readyLudoRoomMock(
   return payload;
 }
 
-function formatRoomCode(id: string, gameType: "monopoly" | "ludo") {
-  const prefix = gameType === "monopoly" ? "MNP" : "LUD";
-  const short = id.replace(/-/g, "").slice(0, 4).toUpperCase();
-  return `${prefix}-${short}`;
-}

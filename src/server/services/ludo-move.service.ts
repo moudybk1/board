@@ -12,7 +12,6 @@ import {
   ludoPawns,
   ludoPlayers,
   matches,
-  rooms,
   users,
 } from "@/server/db/schema";
 import { publishLudo } from "@/server/realtime/ludo-hub";
@@ -30,6 +29,11 @@ import {
 } from "@/server/services/ludo-start.service";
 import { and, asc, eq } from "drizzle-orm";
 import { findCaptures } from "@/lib/game/ludo-rules";
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
+import {
+  findRoomByRef,
+  formatRoomCode,
+} from "@/server/db/repositories/rooms.repository";
 
 export type LudoMoveResult =
   | {
@@ -55,10 +59,6 @@ export type LudoMoveResult =
       message: string;
     };
 
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
-
 /**
  * Apply a legal Ludo pawn move for the active seat using the stored lastRoll.
  * Validates against `movablePawns`, applies captures, grants an extra turn on
@@ -75,12 +75,7 @@ export async function moveLudoPawn(
 
   const db = getDb();
   const result = await db.transaction(async (tx) => {
-    const roomRows = await tx.select().from(rooms);
-    const room = roomRows.find(
-      (row) =>
-        row.id === roomRef ||
-        formatRoomCode(row.id, row.gameType) === roomRef.toUpperCase(),
-    );
+    const room = await findRoomByRef(tx, roomRef);
     if (!room || room.gameType !== "ludo") {
       return {
         ok: false as const,
@@ -612,8 +607,3 @@ function groupPawns(
   return pawnsBySeat;
 }
 
-function formatRoomCode(id: string, gameType: "monopoly" | "ludo") {
-  const prefix = gameType === "monopoly" ? "MNP" : "LUD";
-  const short = id.replace(/-/g, "").slice(0, 4).toUpperCase();
-  return `${prefix}-${short}`;
-}

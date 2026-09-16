@@ -5,10 +5,7 @@ import { eq } from "drizzle-orm";
 
 import { getDb } from "@/server/db";
 import { userPreferences } from "@/server/db/schema";
-
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
 
 export class PreferencesError extends Error {
   status: number;

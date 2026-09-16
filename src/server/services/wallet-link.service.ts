@@ -10,10 +10,7 @@ import { ROBINHOOD_CHAIN_LABEL } from "@/lib/wallet/chains";
 import { buildWalletVerifyMessage } from "@/lib/wallet/siwe";
 import { getDb } from "@/server/db";
 import { userBalances, wallets } from "@/server/db/schema";
-
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
 
 export class WalletLinkError extends Error {
   status: number;

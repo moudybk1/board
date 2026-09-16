@@ -4,6 +4,8 @@ import { getDb } from "@/server/db";
 import { roomPlayers, rooms, users } from "@/server/db/schema";
 import type { GameType, Room, RoomPlayer, RoomStatus } from "@/lib/types";
 import { MOCK_ROOMS } from "@/lib/mock/lobby";
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
+import { formatRoomCode } from "@/server/db/repositories/rooms.repository";
 
 export type ListRoomsQuery = {
   gameType?: GameType;
@@ -12,10 +14,6 @@ export type ListRoomsQuery = {
   /** Default: waiting only. Pass `all` to include in-progress tables. */
   status?: RoomStatus | "all";
 };
-
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
 
 /**
  * Open (and optionally in-progress) rooms for the lobby, shaped like the
@@ -108,16 +106,6 @@ function listFromMock(query: ListRoomsQuery): Room[] {
   }).sort(
     (a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt),
   );
-}
-
-/**
- * Human-readable room codes (MNP-xxxx / LUD-xxxx) derived from the UUID so the
- * lobby can keep showing the same style of IDs once the DB is live.
- */
-function formatRoomCode(id: string, gameType: GameType) {
-  const prefix = gameType === "monopoly" ? "MNP" : "LUD";
-  const short = id.replace(/-/g, "").slice(0, 4).toUpperCase();
-  return `${prefix}-${short}`;
 }
 
 /** Count of waiting rooms per entry-fee tier · used by the lobby filter chips. */

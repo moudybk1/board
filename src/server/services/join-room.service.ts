@@ -10,7 +10,18 @@ import {
   type Room,
 } from "@/lib/types";
 import { getDb } from "@/server/db";
-import { matches, roomPlayers, rooms, users } from "@/server/db/schema";
+import {
+  matches,
+  roomPlayers,
+  rooms,
+  transactions,
+  users,
+} from "@/server/db/schema";
+import {
+  applyBalanceDelta,
+  lockAvailable,
+} from "@/server/db/repositories/balances.repository";
+import { toBoardColumn } from "@/lib/money";
 import { notifyRoomsChanged } from "@/server/realtime/rooms-hub";
 import { publishMonopoly } from "@/server/realtime/monopoly-hub";
 import {
@@ -22,6 +33,11 @@ import {
   startLudoMock,
 } from "@/server/services/ludo-start.service";
 import { publishLudo } from "@/server/realtime/ludo-hub";
+import { isDbConfigured as dbConfigured } from "@/server/lib/db-config";
+import {
+  findRoomByRef,
+  formatRoomCode,
+} from "@/server/db/repositories/rooms.repository";
 
 /** Live mock Monopoly boards keyed by room code (filled after auto-start). */
 export const MOCK_MONOPOLY_LIVE = new Map<string, MonopolyRoomState>();
@@ -67,10 +83,6 @@ export type JoinRoomOptions = {
    */
   deferStart?: boolean;
 };
-
-function dbConfigured() {
-  return Boolean(process.env.DATABASE_URL);
-}
 
 /**
  * Join a waiting room: validate balance, take the next free seat, deduct the
@@ -128,12 +140,7 @@ export async function joinRoom(
       };
     }
 
-    const roomRows = await tx.select().from(rooms);
-    const room = roomRows.find(
-      (row) =>
-        row.id === roomRef ||
-        formatRoomCode(row.id, row.gameType) === roomRef.toUpperCase(),
-    );
+    const room = await findRoomByRef(tx, roomRef);
 
     if (!room) {
       return {
@@ -188,7 +195,10 @@ export async function joinRoom(
     }
 
     const fee = Number(lockedRoom.entryFee);
-    const balance = Number(user.balance);
+    // Read through the balance repository: `users.balance` alone is the legacy
+    // column, and checking it let a player join on tokens that were still
+    // withdrawable from `user_balances.available`.
+    const balance = await lockAvailable(tx, userId);
     if (balance < fee) {
       return {
         ok: false as const,
@@ -202,11 +212,19 @@ export async function joinRoom(
     let seat = 1;
     while (taken.has(seat) && seat <= lockedRoom.maxPlayers) seat += 1;
 
-    const balanceAfter = balance - fee;
-    await tx
-      .update(users)
-      .set({ balance: balanceAfter.toFixed(2) })
-      .where(eq(users.id, userId));
+    const balanceAfter = await applyBalanceDelta(tx, userId, -fee);
+
+    // Record the fee on the ledger. The `entry_fee` transaction type already
+    // existed and was queried by the wallet history, but nothing ever wrote
+    // one, so the ledger never reconciled against the balance.
+    await tx.insert(transactions).values({
+      userId,
+      type: "entry_fee",
+      status: "confirmed",
+      amount: toBoardColumn(-fee),
+      referenceId: lockedRoom.id,
+      note: `Entry fee · ${formatRoomCode(lockedRoom.id, lockedRoom.gameType)}`,
+    });
 
     await tx.insert(roomPlayers).values({
       roomId: lockedRoom.id,
@@ -474,8 +492,3 @@ function joinRoomMock(
   };
 }
 
-function formatRoomCode(id: string, gameType: "monopoly" | "ludo") {
-  const prefix = gameType === "monopoly" ? "MNP" : "LUD";
-  const short = id.replace(/-/g, "").slice(0, 4).toUpperCase();
-  return `${prefix}-${short}`;
-}
