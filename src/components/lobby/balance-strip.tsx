@@ -3,6 +3,7 @@ import { Link2, Lock } from "lucide-react";
 import { BoardAmount } from "@/components/ui/board-amount";
 import { PixelBadge } from "@/components/ui/pixel-badge";
 import { PixelLabel } from "@/components/ui/pixel-label";
+import { PLAY_IS_LIVE, SAMPLE_DATA_LABEL } from "@/lib/platform-status";
 import type { WalletBalance } from "@/lib/types";
 import { cn, formatBoard } from "@/lib/utils";
 
@@ -21,8 +22,12 @@ export function BalanceStrip({
   cheapestEntryFee?: number;
   className?: string;
 }) {
+  // A shortfall warning against a sample balance would be inventing a problem,
+  // so it only appears once staking is live.
   const cannotPlay =
-    cheapestEntryFee !== undefined && balance.available < cheapestEntryFee;
+    PLAY_IS_LIVE &&
+    cheapestEntryFee !== undefined &&
+    balance.available < cheapestEntryFee;
 
   return (
     <section
@@ -38,7 +43,11 @@ export function BalanceStrip({
       <div className="relative p-5 sm:p-6">
         <div className="flex flex-wrap items-center gap-2">
           <PixelLabel className="text-gold/80">Available to stake</PixelLabel>
-          <PixelBadge tone="gold">Ready</PixelBadge>
+          {PLAY_IS_LIVE ? (
+            <PixelBadge tone="gold">Ready</PixelBadge>
+          ) : (
+            <PixelBadge tone="neutral">{SAMPLE_DATA_LABEL}</PixelBadge>
+          )}
         </div>
         <BoardAmount
           value={balance.available}
@@ -46,6 +55,13 @@ export function BalanceStrip({
           tone="gold"
           className="mt-3"
         />
+        {!PLAY_IS_LIVE ? (
+          <p className="mt-2 text-[11px] leading-relaxed text-muted">
+            Not a real balance. Connect a wallet once staking is live to see
+            yours.
+          </p>
+        ) : null}
+
         <div className="mt-4 flex flex-wrap items-center gap-4">
           <div>
             <PixelLabel className="flex items-center gap-1.5 text-faint">

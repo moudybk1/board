@@ -4,6 +4,7 @@ import { SeatDots } from "@/components/lobby/seat-dots";
 import { PixelBadge } from "@/components/ui/pixel-badge";
 import { PixelButton, PixelButtonLink } from "@/components/ui/pixel-button";
 import { BoardAmount } from "@/components/ui/board-amount";
+import { PLAY_IS_LIVE } from "@/lib/platform-status";
 import { netPrize, seatsLeft, type Room } from "@/lib/types";
 import { cn, formatAge } from "@/lib/utils";
 
@@ -108,7 +109,13 @@ export function RoomCard({
             </span>
           </div>
 
-          {joinable ? (
+          {!PLAY_IS_LIVE && open ? (
+            <PixelButton variant={accent} size="sm" disabled>
+              Coming soon
+            </PixelButton>
+          ) : null}
+
+          {PLAY_IS_LIVE && joinable ? (
             <PixelButtonLink
               href={`/room/${room.id}`}
               variant={accent}
@@ -118,7 +125,7 @@ export function RoomCard({
             </PixelButtonLink>
           ) : null}
 
-          {open && !affordable ? (
+          {PLAY_IS_LIVE && open && !affordable ? (
             <PixelButton
               variant={accent}
               size="sm"
@@ -136,7 +143,7 @@ export function RoomCard({
           ) : null}
         </div>
 
-        {open && !affordable ? (
+        {PLAY_IS_LIVE && open && !affordable ? (
           <div
             id={shortfallId}
             role="status"
@@ -159,7 +166,7 @@ export function RoomCard({
           </div>
         ) : null}
 
-        {joinable && free > 0 ? (
+        {PLAY_IS_LIVE && joinable && free > 0 ? (
           <p className="text-[10px] text-muted">
             Waiting for {free} more {free === 1 ? "player" : "players"}
           </p>
