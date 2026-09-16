@@ -9,7 +9,7 @@ type PixelFieldProps = Omit<React.ComponentProps<"input">, "size"> & {
 };
 
 /**
- * Canonical text / number field · hard border, void fill, gold focus ring.
+ * Canonical text / number field · cream fill, chocolate border, gold focus.
  */
 export function PixelField({
   className,
@@ -31,12 +31,12 @@ export function PixelField({
           error ? `${fieldId}-error` : hint ? `${fieldId}-hint` : undefined
         }
         className={cn(
-          "mt-2 w-full border-2 bg-void px-3 py-3 text-sm text-parchment outline-none",
-          "transition-[border-color] duration-100",
+          "mt-2 w-full rounded-[1.15rem] border-[3px] bg-cream px-3 py-3 text-base text-parchment outline-none",
+          "transition-[border-color,box-shadow] duration-100",
           "placeholder:text-faint",
-          "focus:border-gold focus-visible:pixel-focus",
+          "focus:border-gold-deep focus-visible:pixel-focus",
           "disabled:cursor-not-allowed disabled:opacity-40",
-          error ? "border-danger" : "border-edge",
+          error ? "border-danger" : "border-void",
           label ? null : "mt-0",
           className,
         )}
@@ -46,14 +46,14 @@ export function PixelField({
         <span
           id={`${fieldId}-error`}
           role="alert"
-          className="mt-1 block font-pixel text-[9px] text-danger"
+          className="mt-1 block font-pixel text-xs text-danger"
         >
           {error}
         </span>
       ) : hint ? (
         <span
           id={`${fieldId}-hint`}
-          className="mt-1 block text-xs text-muted"
+          className="mt-1 block text-sm text-muted"
         >
           {hint}
         </span>

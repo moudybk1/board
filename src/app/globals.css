@@ -1,45 +1,51 @@
-/* Self-hosted Press Start 2P — whole app is pixel type. */
+/* Fredoka for the toy UI · Press Start kept only for the BOARD wordmark. */
+@import "@fontsource/fredoka/500.css";
+@import "@fontsource/fredoka/600.css";
+@import "@fontsource/fredoka/700.css";
 @import "@fontsource/press-start-2p/400.css";
 @import "tailwindcss";
 
 /* ==========================================================================
-   BOARD design system (candy arcade tabletop)
-   Warm ocean playfield + sunny yellow primary, sky cyan Monopoly, candy pink
-   Ludo. Happy / colorful without purple-gradient SaaS defaults.
+   BOARD design system (cartoon playground)
+   Sunny sky + green felt table + chocolate outlines + jelly buttons.
+   Fun to sit down and play · not a CRT cabinet.
    Backup of the prior phosphor CRT theme:
    src/app/themes/backup-phosphor-crt/globals.css
    ========================================================================== */
 @theme {
-  /* Surfaces: deep teal-ocean cabinet (cheerful, not charcoal gloom) */
-  --color-void: #071526;
-  --color-ink: #0c1f38;
-  --color-surface: #143352;
-  --color-surface-raised: #1c4268;
-  --color-surface-hover: #2a5a8a80;
+  /* Chocolate ink · used for outlines, button labels, and dark overlays */
+  --color-void: #2d170c;
+  --color-ink: #fff4c4;
 
-  /* Strokes */
-  --color-edge: #3a6a94;
-  --color-edge-bright: #5a8fbf;
+  /* Cream sticker surfaces */
+  --color-surface: #fffaf1;
+  --color-surface-raised: #fff6de;
+  --color-surface-hover: #ffe8a8;
+  --color-cream: #fff8e4;
 
-  /* Type — warm parchment for a sunny read */
-  --color-parchment: #fff6e8;
-  --color-muted: #b7cfe6;
-  --color-faint: #7a9bb8;
+  /* Strokes · same chocolate family, always chunky */
+  --color-edge: #2d170c;
+  --color-edge-bright: #6b3a14;
 
-  /* Accents: "gold" token = sunny lemon (keeps text-gold / bg-gold working) */
-  --color-gold: #ffd84a;
-  --color-gold-deep: #ff8c2a;
-  --color-monopoly: #3ddcff;
-  --color-ludo: #ff6b9d;
-  --color-danger: #ff5a6a;
-  --color-success: #5dff9f;
+  /* Type on cream */
+  --color-parchment: #2d170c;
+  --color-muted: #7a4e2a;
+  --color-faint: #8d5a32;
 
-  /* One pixel stack for the whole app (body, UI chrome, mono labels). */
-  --font-pixel: "Press Start 2P", "Courier New", monospace;
-  --font-sans: "Press Start 2P", "Courier New", monospace;
-  --font-mono: "Press Start 2P", "Courier New", monospace;
+  /* Candy accents · lemon primary, sky Monopoly, bubblegum Ludo */
+  --color-gold: #ffd23a;
+  --color-gold-deep: #c45a00;
+  --color-monopoly: #1298c9;
+  --color-ludo: #e83f86;
+  --color-danger: #e23b3b;
+  --color-success: #1a9f4b;
+  --color-felt: #2ecf7a;
 
-  /* Spacing rhythm (4px grid - matches pixel-corner notch size). */
+  --font-pixel: "Fredoka", "Trebuchet MS", sans-serif;
+  --font-sans: "Fredoka", "Trebuchet MS", sans-serif;
+  --font-mono: "Fredoka", "Trebuchet MS", sans-serif;
+  --font-mark: "Press Start 2P", "Fredoka", monospace;
+
   --spacing-px-1: 4px;
   --spacing-px-2: 8px;
   --spacing-px-3: 12px;
@@ -50,17 +56,14 @@
   --spacing-px-10: 40px;
   --spacing-px-12: 48px;
 
-  /* Layout widths */
   --container-board: 72rem;
   --container-narrow: 40rem;
 
-  /* Breakpoint-friendly type steps for pixel headings */
-  --text-pixel-xs: clamp(0.5rem, 0.42rem + 0.35vw, 0.625rem);
-  --text-pixel-sm: clamp(0.5625rem, 0.48rem + 0.4vw, 0.75rem);
-  --text-pixel-md: clamp(0.6875rem, 0.55rem + 0.55vw, 0.875rem);
-  --text-pixel-lg: clamp(0.875rem, 0.7rem + 0.8vw, 1.25rem);
+  --text-pixel-xs: clamp(0.75rem, 0.7rem + 0.2vw, 0.8125rem);
+  --text-pixel-sm: clamp(0.875rem, 0.8rem + 0.3vw, 1rem);
+  --text-pixel-md: clamp(1.05rem, 0.9rem + 0.6vw, 1.35rem);
+  --text-pixel-lg: clamp(1.5rem, 1.1rem + 1.4vw, 2.35rem);
 
-  /* Stacking */
   --z-base: 0;
   --z-raised: 10;
   --z-sticky: 40;
@@ -68,25 +71,24 @@
   --z-toast: 60;
   --z-modal: 70;
 
-  /* Hard-offset shadows - the pixel equivalent of elevation. */
-  --shadow-pixel: 4px 4px 0 0 var(--color-void);
-  --shadow-pixel-sm: 2px 2px 0 0 var(--color-void);
-  --shadow-pixel-lg: 6px 6px 0 0 var(--color-void);
-  --shadow-pixel-gold: 4px 4px 0 0 var(--color-gold-deep);
+  /* Chunky storybook elevation · thick bottom lip, not a blur shadow */
+  --shadow-pixel: 0 6px 0 0 var(--color-void);
+  --shadow-pixel-sm: 0 3px 0 0 var(--color-void);
+  --shadow-pixel-lg: 0 10px 0 0 var(--color-void);
+  --shadow-pixel-gold: 0 6px 0 0 var(--color-gold-deep);
 
-  /* Motion durations (calm / premium - never frantic). */
   --duration-instant: 100ms;
   --duration-fast: 180ms;
   --duration-normal: 320ms;
   --duration-slow: 560ms;
 
-  /* Animations */
   --animate-float: float 3s ease-in-out infinite;
   --animate-pulse-glow: pulse-glow 2.4s ease-in-out infinite;
   --animate-blink: blink 1.1s steps(1, end) infinite;
   --animate-scan: scan 8s linear infinite;
-  --animate-pixel-pop: pixel-pop 280ms steps(4, end) both;
-  --animate-slide-up: slide-up 320ms ease-out both;
+  --animate-pixel-pop: pixel-pop 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-slide-up: slide-up 360ms cubic-bezier(0.34, 1.4, 0.64, 1) both;
+  --animate-wiggle: wiggle 700ms ease-in-out infinite;
 }
 
 @keyframes float {
@@ -95,7 +97,7 @@
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-4px);
+    transform: translateY(-6px);
   }
 }
 
@@ -103,9 +105,11 @@
   0%,
   100% {
     opacity: 1;
+    transform: scale(1);
   }
   50% {
-    opacity: 0.55;
+    opacity: 0.7;
+    transform: scale(0.96);
   }
 }
 
@@ -130,27 +134,37 @@
 
 @keyframes pixel-pop {
   0% {
-    transform: scale(0.85);
+    transform: scale(0.82) rotate(-3deg);
     opacity: 0;
   }
-  60% {
-    transform: scale(1.04);
+  70% {
+    transform: scale(1.06) rotate(1deg);
     opacity: 1;
   }
   100% {
-    transform: scale(1);
+    transform: scale(1) rotate(0deg);
     opacity: 1;
   }
 }
 
 @keyframes slide-up {
   from {
-    transform: translateY(10px);
+    transform: translateY(14px) scale(0.98);
     opacity: 0;
   }
   to {
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
     opacity: 1;
+  }
+}
+
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(-1.4deg);
+  }
+  50% {
+    transform: rotate(1.4deg);
   }
 }
 
@@ -159,105 +173,86 @@
    -------------------------------------------------------------------------- */
 @layer base {
   html {
-    background-color: var(--color-void);
-    color-scheme: dark;
+    background-color: #7ed6ff;
+    color-scheme: light;
     overscroll-behavior-y: none;
   }
 
   /*
-    Candy arcade playfield:
-    - Warm ocean base (party table, not CRT gloom)
-    - Lemon / cyan / pink corner blooms
-    - Soft vignette so content still sits on a table
+    Cartoon playground:
+    - Sky wash + lemon sun in the corner
+    - Soft hills of felt at the bottom
+    - Candy blooms (sky / pink / mint) so Monopoly and Ludo share the table
   */
   body {
     position: relative;
     min-height: 100dvh;
     color: var(--color-parchment);
-    font-family: "Press Start 2P", "Courier New", monospace !important;
-    font-size: 10px;
-    line-height: 1.85;
-    letter-spacing: 0.05em;
-    -webkit-font-smoothing: none;
-    -moz-osx-font-smoothing: unset;
-    background-color: #0a1c36;
+    font-family: "Fredoka", "Trebuchet MS", sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #7ed6ff;
     background-image:
+      radial-gradient(circle at 88% 8%, #ffe566 0 7%, transparent 8%),
       radial-gradient(
-        ellipse 95% 70% at 50% -12%,
-        color-mix(in srgb, var(--color-gold) 28%, transparent),
-        transparent 58%
-      ),
-      radial-gradient(
-        ellipse 55% 50% at 100% 15%,
-        color-mix(in srgb, var(--color-monopoly) 22%, transparent),
+        ellipse 70% 45% at 12% -10%,
+        #fff7d1 0%,
         transparent 62%
       ),
       radial-gradient(
-        ellipse 50% 45% at 0% 80%,
-        color-mix(in srgb, var(--color-ludo) 18%, transparent),
-        transparent 60%
+        ellipse 50% 40% at 100% 30%,
+        color-mix(in srgb, var(--color-ludo) 28%, transparent),
+        transparent 70%
       ),
       radial-gradient(
-        ellipse 40% 35% at 80% 90%,
-        color-mix(in srgb, var(--color-success) 12%, transparent),
-        transparent 55%
+        ellipse 45% 35% at 0% 70%,
+        color-mix(in srgb, var(--color-monopoly) 26%, transparent),
+        transparent 68%
       ),
       radial-gradient(
-        ellipse 120% 90% at 50% 55%,
-        transparent 32%,
-        color-mix(in srgb, var(--color-void) 72%, transparent) 100%
+        ellipse 90% 40% at 50% 115%,
+        #2ecf7a 0%,
+        #25b56a 38%,
+        transparent 70%
       ),
-      linear-gradient(
-        165deg,
-        #1a3a62 0%,
-        #102848 45%,
-        #0a1c36 100%
-      );
+      linear-gradient(180deg, #9ae4ff 0%, #7ed6ff 42%, #b8f0c8 100%);
     background-attachment: fixed;
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
   }
 
-  /* Soft weave + grain — lighter, more festive than CRT grit. */
+  /* Soft paper grain only · no CRT grit */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
     z-index: 80;
     pointer-events: none;
-    opacity: 0.42;
-    background-image:
-      url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"),
-      repeating-linear-gradient(
-        45deg,
-        transparent 0 11px,
-        rgba(255, 216, 74, 0.035) 11px 12px
-      ),
-      repeating-linear-gradient(
-        -45deg,
-        transparent 0 11px,
-        rgba(61, 220, 255, 0.028) 11px 12px
-      );
-    background-size:
-      200px 200px,
-      24px 24px,
-      24px 24px;
-    mix-blend-mode: soft-light;
+    opacity: 0.18;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+    background-size: 180px 180px;
+    mix-blend-mode: multiply;
   }
 
-  /* Soft scanlines kept subtle so color stays the hero. */
+  /* Optional confetti dots (settings "scanlines" toggle) */
   body::after {
     content: "";
     position: fixed;
     inset: 0;
     z-index: 81;
     pointer-events: none;
-    opacity: 0.022;
-    background-image: repeating-linear-gradient(
-      to bottom,
-      transparent 0 3px,
-      rgba(0, 0, 0, 0.45) 3px 4px
-    );
+    opacity: 0.16;
+    background-image:
+      radial-gradient(circle at 12% 18%, #ffd23a 0 3px, transparent 4px),
+      radial-gradient(circle at 78% 22%, #e83f86 0 2px, transparent 3px),
+      radial-gradient(circle at 32% 64%, #fff 0 2.5px, transparent 3.5px),
+      radial-gradient(circle at 88% 70%, #1298c9 0 3px, transparent 4px),
+      radial-gradient(circle at 54% 40%, #2ecf7a 0 2px, transparent 3px);
+    background-size: 180px 180px;
   }
 
   html[data-scanlines="off"] body::after {
@@ -267,18 +262,14 @@
   img[data-pixel],
   canvas,
   [data-pixel] {
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
+    image-rendering: auto;
   }
 
-  body,
-  body *,
   .font-pixel,
   .font-sans,
   .font-mono {
-    -webkit-font-smoothing: none;
-    font-family: "Press Start 2P", "Courier New", monospace;
-    letter-spacing: 0.05em;
+    font-family: "Fredoka", "Trebuchet MS", sans-serif;
+    letter-spacing: 0.01em;
   }
 
   ::selection {
@@ -287,7 +278,7 @@
   }
 
   * {
-    scrollbar-color: var(--color-edge-bright) var(--color-ink);
+    scrollbar-color: var(--color-gold-deep) var(--color-cream);
     scrollbar-width: thin;
   }
 
@@ -321,20 +312,13 @@
    -------------------------------------------------------------------------- */
 
 @utility pixel-corners {
-  clip-path: polygon(
-    0 4px,
-    4px 4px,
-    4px 0,
-    calc(100% - 4px) 0,
-    calc(100% - 4px) 4px,
-    100% 4px,
-    100% calc(100% - 4px),
-    calc(100% - 4px) calc(100% - 4px),
-    calc(100% - 4px) 100%,
-    4px 100%,
-    4px calc(100% - 4px),
-    0 calc(100% - 4px)
-  );
+  border-radius: 1.25rem;
+}
+
+@utility font-mark {
+  font-family: var(--font-mark);
+  letter-spacing: 0.08em;
+  line-height: 1.2;
 }
 
 @utility scanlines {
@@ -344,22 +328,23 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background-image: repeating-linear-gradient(
-      to bottom,
-      transparent 0 3px,
-      rgba(0, 0, 0, 0.12) 3px 4px
-    );
+    border-radius: inherit;
+    opacity: 0.35;
+    background-image:
+      radial-gradient(circle at 18% 24%, #ffd23a 0 4px, transparent 5px),
+      radial-gradient(circle at 82% 70%, #e83f86 0 3px, transparent 4px);
   }
 }
 
 @utility text-shadow-pixel {
-  text-shadow: 2px 2px 0 var(--color-void);
+  text-shadow: 2px 3px 0 color-mix(in srgb, var(--color-cream) 80%, transparent);
 }
 
 @utility font-pixel {
   font-family: var(--font-pixel);
-  letter-spacing: 0.06em;
-  line-height: 1.6;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+  font-weight: 650;
 }
 
 @utility board-atmosphere {
@@ -373,51 +358,38 @@
     pointer-events: none;
     background:
       radial-gradient(
-        ellipse 70% 42% at 50% 0%,
-        color-mix(in srgb, var(--color-gold) 22%, transparent),
+        ellipse 55% 40% at 90% 0%,
+        color-mix(in srgb, var(--color-gold) 35%, transparent),
         transparent 62%
       ),
       radial-gradient(
-        ellipse 55% 50% at 100% 40%,
-        color-mix(in srgb, var(--color-monopoly) 16%, transparent),
+        ellipse 45% 40% at 0% 80%,
+        color-mix(in srgb, var(--color-ludo) 22%, transparent),
         transparent 65%
-      ),
-      radial-gradient(
-        ellipse 45% 40% at 0% 70%,
-        color-mix(in srgb, var(--color-ludo) 12%, transparent),
-        transparent 60%
-      ),
-      radial-gradient(
-        ellipse 90% 55% at 50% 100%,
-        color-mix(in srgb, var(--color-void) 65%, transparent),
-        transparent 72%
       );
   }
 }
 
 @utility felt-stage {
   position: relative;
-  border: 2px solid color-mix(in srgb, var(--color-edge-bright) 70%, var(--color-gold) 30%);
+  border: 4px solid var(--color-void);
+  border-radius: 2rem;
   background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--color-surface-raised) 60%, transparent) 0%,
-      color-mix(in srgb, var(--color-ink) 85%, transparent) 100%
-    ),
     radial-gradient(
-      ellipse 80% 60% at 50% 0%,
-      color-mix(in srgb, var(--color-gold) 14%, transparent),
-      transparent 70%
+      ellipse 80% 55% at 50% 0%,
+      rgba(255, 255, 255, 0.22),
+      transparent 58%
     ),
-    radial-gradient(
-      ellipse 50% 40% at 100% 100%,
-      color-mix(in srgb, var(--color-monopoly) 10%, transparent),
-      transparent 65%
-    );
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 22px,
+      rgba(255, 255, 255, 0.05) 22px 23px
+    ),
+    linear-gradient(180deg, #3ee08a 0%, #22c36e 100%);
   box-shadow:
-    0 0 0 4px color-mix(in srgb, var(--color-void) 70%, transparent),
-    6px 6px 0 0 var(--color-void),
-    inset 0 1px 0 0 color-mix(in srgb, var(--color-gold) 28%, transparent);
+    0 10px 0 0 var(--color-void),
+    inset 0 0 0 10px color-mix(in srgb, var(--color-void) 16%, transparent),
+    inset 0 12px 0 0 rgba(255, 255, 255, 0.12);
 }
 
 @utility board-container {
@@ -437,14 +409,14 @@
 }
 
 @utility pixel-focus {
-  outline: 2px solid var(--color-gold);
-  outline-offset: 2px;
+  outline: 3px solid var(--color-gold-deep);
+  outline-offset: 3px;
 }
 
 @utility pixel-inset {
   box-shadow:
-    inset 2px 2px 0 0 color-mix(in srgb, var(--color-void) 70%, transparent),
-    inset -1px -1px 0 0 color-mix(in srgb, var(--color-edge-bright) 35%, transparent);
+    inset 0 3px 0 0 color-mix(in srgb, var(--color-void) 18%, transparent),
+    inset 0 -2px 0 0 rgba(255, 255, 255, 0.35);
 }
 
 @utility text-pixel-fluid-sm {

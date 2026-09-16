@@ -159,7 +159,7 @@ export function DepositForm({ className }: { className?: string }) {
             if (formError) setFormError(null);
           }}
           className={cn(
-            "mt-2 w-full border-2 bg-void px-3 py-3 font-pixel text-sm text-parchment outline-none focus:border-gold",
+            "mt-2 w-full rounded-[1.15rem] border-[3px] bg-cream px-3 py-3 font-pixel text-base text-parchment outline-none focus:border-gold-deep",
             formError ? "border-danger" : "border-edge",
           )}
         />

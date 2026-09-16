@@ -17,7 +17,7 @@ import { boardColors } from "@/lib/design-system";
 export const metadata = {
   title: "Design system | BOARD",
   description:
-    "Global pixel design tokens and UI primitives for the BOARD gaming platform.",
+    "Global cartoon design tokens and UI primitives for the BOARD gaming platform.",
 };
 
 const SWATCHES = [
@@ -45,12 +45,12 @@ export default function DesignSystemPage() {
         <header className="max-w-2xl space-y-3">
           <PixelLabel>Design system</PixelLabel>
           <PixelHeading as="h1" size="xl">
-            Pixel premium
+            Cartoon table
           </PixelHeading>
           <p className="text-sm leading-relaxed text-muted sm:text-base">
-            Midnight surfaces, hard shadows, Press Start display type, and calm
-            motion. Use these primitives everywhere so BOARD never looks like a
-            generic dark dashboard.
+            Cream stickers, chocolate outlines, jelly buttons, and Fredoka
+            type. Use these primitives everywhere so BOARD feels like a toy
+            you want to sit down and play.
           </p>
         </header>
 
@@ -101,8 +101,8 @@ export default function DesignSystemPage() {
             </PixelPanelHeader>
             <div className="space-y-3 p-5 text-sm leading-relaxed text-muted">
               <p>
-                The whole UI runs on Press Start 2P. Keep lines short — pixel
-                faces chew width fast on small screens.
+                The whole UI runs on Fredoka. Keep lines short on small
+                screens so the round face stays bouncy, not cramped.
               </p>
               <p className="text-parchment">
                 Four seats. One winner. Two percent fee · treasury and burn.
@@ -169,11 +169,11 @@ export default function DesignSystemPage() {
             <div className="relative flex h-full flex-col items-center justify-center gap-3 p-6 text-center">
               <PixelLabel>Game stage</PixelLabel>
               <PixelHeading as="p" size="lg" className="animate-float">
-                Pixel board lives here
+                Toy board lives here
               </PixelHeading>
               <p className="max-w-md text-sm text-muted">
-                Use PixelFrame for Monopoly / Ludo stages · hard edge, large
-                shadow, optional scanlines.
+                Use PixelFrame for Monopoly / Ludo stages. Thick chocolate
+                rim, jelly shadow, optional confetti.
               </p>
             </div>
           </PixelFrame>

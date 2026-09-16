@@ -1,11 +1,11 @@
 import { cn } from "@/lib/utils";
 
 const toneClasses = {
-  default: "border-edge bg-surface",
-  raised: "border-edge-bright bg-surface-raised",
-  gold: "border-gold/60 bg-gold/5",
-  monopoly: "border-monopoly/50 bg-monopoly/5",
-  ludo: "border-ludo/50 bg-ludo/5",
+  default: "border-void bg-surface",
+  raised: "border-void bg-surface-raised",
+  gold: "border-void bg-gold/35",
+  monopoly: "border-void bg-monopoly/15",
+  ludo: "border-void bg-ludo/15",
 } as const;
 
 export type PanelTone = keyof typeof toneClasses;
@@ -19,7 +19,7 @@ export function PixelPanel({
   return (
     <div
       className={cn(
-        "pixel-corners border-2 shadow-pixel",
+        "pixel-corners border-[3px] shadow-pixel",
         toneClasses[tone],
         className,
       )}
@@ -38,7 +38,7 @@ export function PixelPanelHeader({
   return (
     <div
       className={cn(
-        "flex items-center justify-between gap-3 border-b-2 border-edge bg-void/40 px-4 py-3",
+        "flex items-center justify-between gap-3 border-b-[3px] border-void bg-cream/80 px-4 py-3",
         className,
       )}
       {...props}
@@ -56,7 +56,7 @@ export function PixelPanelTitle({
   return (
     <h2
       className={cn(
-        "font-pixel text-[11px] uppercase text-parchment text-shadow-pixel",
+        "font-pixel text-sm font-bold uppercase tracking-wide text-parchment",
         className,
       )}
       {...props}

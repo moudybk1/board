@@ -38,7 +38,7 @@ export function RoomEconomyHighlight({
     return (
       <div
         className={cn(
-          "pixel-corners flex flex-wrap items-center gap-x-3 gap-y-2 border-2 border-gold/40 bg-gold/5 px-3 py-2",
+          "pixel-corners flex flex-wrap items-center gap-x-3 gap-y-2 border-[3px] border-void bg-cream px-3 py-2",
           className,
         )}
       >
@@ -61,7 +61,7 @@ export function RoomEconomyHighlight({
           tone="gold"
           emphasize
         />
-        <span className="font-pixel text-[8px] uppercase text-faint">
+        <span className="font-pixel text-xs font-bold uppercase text-faint">
           −{feePercent}% fee
         </span>
         {balance !== undefined && (
@@ -78,8 +78,8 @@ export function RoomEconomyHighlight({
 
   return (
     <PixelPanel tone="gold" className={cn("overflow-hidden", className)}>
-      <div className="border-b-2 border-gold/20 bg-void/30 px-4 py-3">
-        <PixelLabel className="text-gold">Room economy</PixelLabel>
+      <div className="border-b-[3px] border-void bg-gold/40 px-4 py-3">
+        <PixelLabel className="text-void">Room economy</PixelLabel>
         <p className="mt-1 text-xs text-muted">
           {seats} seats · {feePercent}% prize fee → treasury + burn
         </p>
@@ -112,17 +112,17 @@ export function RoomEconomyHighlight({
         />
       </div>
 
-      <div className="border-t-2 border-gold/30 bg-gold/10 px-4 py-3">
+      <div className="border-t-[3px] border-void bg-gold px-4 py-3">
         <div className="flex items-center justify-between gap-3">
-          <span className="font-pixel text-[9px] uppercase text-gold">
+          <span className="font-pixel text-xs font-bold uppercase text-void">
             Winner receives
           </span>
-          <BoardAmount value={net} size="lg" tone="gold" />
+          <BoardAmount value={net} size="lg" tone="default" />
         </div>
         {balance !== undefined && (
           <p
             className={cn(
-              "mt-2 font-pixel text-[8px] uppercase",
+              "mt-2 font-pixel text-xs font-bold uppercase",
               canAfford ? "text-success" : "text-danger",
             )}
           >
@@ -180,8 +180,8 @@ function EconomyCell({
   tone: "default" | "gold" | "danger" | "muted";
 }) {
   return (
-    <div className="pixel-corners border-2 border-edge bg-void/40 px-3 py-2.5">
-      <p className="flex items-center gap-1.5 font-pixel text-[8px] uppercase text-faint">
+    <div className="pixel-corners border-[3px] border-void bg-cream px-3 py-2.5">
+      <p className="flex items-center gap-1.5 font-pixel text-xs font-bold uppercase text-faint">
         {icon}
         {label}
       </p>

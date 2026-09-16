@@ -7,34 +7,34 @@ import { playSfx } from "@/lib/audio/audio-manager";
 import { cn } from "@/lib/utils";
 
 const pixelButton = cva(
-  // The translate-on-press trick sells the "physical key" feel: the button
-  // slides into its own hard shadow instead of fading or scaling.
+  // Jelly key: the button sits on a thick chocolate lip and squishes into it.
   [
-    "pixel-corners inline-flex select-none items-center justify-center gap-2 border-2",
-    "font-pixel uppercase transition-[transform,box-shadow,background-color] duration-100",
-    "active:translate-x-[3px] active:translate-y-[3px] active:shadow-none",
-    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold",
-    "disabled:pointer-events-none disabled:opacity-40 disabled:shadow-none",
+    "pixel-corners inline-flex select-none items-center justify-center gap-2 border-[3px]",
+    "font-pixel font-bold uppercase tracking-wide",
+    "transition-[transform,box-shadow,background-color] duration-100",
+    "active:translate-y-[6px] active:shadow-none",
+    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-deep",
+    "disabled:pointer-events-none disabled:opacity-40 disabled:shadow-none disabled:active:translate-y-0",
   ],
   {
     variants: {
       variant: {
         primary:
-          "border-gold-deep bg-gold text-void shadow-pixel hover:bg-gold/85",
+          "border-void bg-gold text-void shadow-pixel hover:bg-[#ffe566]",
         secondary:
-          "border-edge-bright bg-surface-raised text-parchment shadow-pixel hover:bg-surface-hover",
+          "border-void bg-surface-raised text-parchment shadow-pixel hover:bg-surface-hover",
         outline:
-          "border-edge-bright bg-transparent text-parchment shadow-pixel-sm hover:bg-surface-hover",
+          "border-void bg-cream text-parchment shadow-pixel-sm hover:bg-surface-hover",
         monopoly:
-          "border-monopoly/70 bg-monopoly/15 text-monopoly shadow-pixel hover:bg-monopoly/25",
-        ludo: "border-ludo/70 bg-ludo/15 text-ludo shadow-pixel hover:bg-ludo/25",
+          "border-void bg-monopoly text-cream shadow-pixel hover:brightness-110",
+        ludo: "border-void bg-ludo text-cream shadow-pixel hover:brightness-110",
         ghost:
-          "border-transparent bg-transparent text-muted shadow-none hover:text-parchment active:translate-none",
+          "border-transparent bg-transparent text-muted shadow-none hover:text-parchment active:translate-y-0",
       },
       size: {
-        sm: "px-3 py-2 text-[9px]",
-        md: "px-5 py-3 text-[10px]",
-        lg: "px-7 py-4 text-[12px]",
+        sm: "px-3.5 py-2 text-xs",
+        md: "px-5 py-2.5 text-sm",
+        lg: "px-7 py-3.5 text-base",
       },
     },
     defaultVariants: { variant: "primary", size: "md" },

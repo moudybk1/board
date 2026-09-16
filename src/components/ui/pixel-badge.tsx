@@ -3,16 +3,16 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const pixelBadge = cva(
-  "pixel-corners inline-flex items-center gap-1.5 border-2 px-2 py-1 font-pixel text-[8px] uppercase",
+  "inline-flex items-center gap-1.5 rounded-full border-[3px] px-2.5 py-1 font-pixel text-[11px] font-bold uppercase tracking-wide",
   {
     variants: {
       tone: {
-        neutral: "border-edge bg-surface-raised text-muted",
-        gold: "border-gold/60 bg-gold/10 text-gold",
-        monopoly: "border-monopoly/50 bg-monopoly/10 text-monopoly",
-        ludo: "border-ludo/50 bg-ludo/10 text-ludo",
-        success: "border-success/50 bg-success/10 text-success",
-        danger: "border-danger/50 bg-danger/10 text-danger",
+        neutral: "border-void bg-cream text-muted",
+        gold: "border-void bg-gold text-void",
+        monopoly: "border-void bg-monopoly text-cream",
+        ludo: "border-void bg-ludo text-cream",
+        success: "border-void bg-success text-cream",
+        danger: "border-void bg-danger text-cream",
       },
     },
     defaultVariants: { tone: "neutral" },

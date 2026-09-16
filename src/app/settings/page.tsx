@@ -8,7 +8,7 @@ import { PixelButtonLink } from "@/components/ui/pixel-button";
 
 export const metadata: Metadata = {
   title: "Settings | BOARD",
-  description: "Display and sound preferences for the BOARD pixel client.",
+  description: "Display and sound preferences for the BOARD cartoon table.",
 };
 
 export default function SettingsPage() {
@@ -16,11 +16,11 @@ export default function SettingsPage() {
     <ProductShell accent="mint">
       <PageHero
         title="Settings"
-        support="Motion, CRT scanlines, SFX, and music — saved on this device."
+        support="Motion, confetti dots, SFX, and music - saved on this device."
         meta={
           <>
             <HeroStat label="Scope" value="This device" />
-            <HeroStat label="Look" value="Phosphor" />
+            <HeroStat label="Look" value="Cartoon" />
           </>
         }
         actions={
@@ -29,16 +29,16 @@ export default function SettingsPage() {
           </PixelButtonLink>
         }
         stage={
-          <div className="border-2 border-edge-bright bg-ink/85 p-4 pixel-inset sm:p-5">
-            <p className="font-pixel text-[8px] uppercase tracking-widest text-gold">
+          <div className="rounded-[1.25rem] border-[3px] border-void bg-cream p-4 sm:p-5">
+            <p className="font-pixel text-xs font-bold uppercase tracking-wide text-gold-deep">
               Tips
             </p>
-            <ul className="mt-3 space-y-2 text-xs leading-relaxed text-muted">
+            <ul className="mt-3 space-y-2 text-sm leading-relaxed text-muted">
               <li>Reduce motion softens dice hops and idle bobbing.</li>
-              <li>Scanlines recreate the CRT cabinet look.</li>
+              <li>Confetti dots sprinkle candy over the playground.</li>
               <li>
                 Also on{" "}
-                <Link href="/account" className="text-gold hover:underline">
+                <Link href="/account" className="font-bold text-gold-deep hover:underline">
                   Account
                 </Link>
                 .

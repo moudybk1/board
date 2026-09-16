@@ -87,8 +87,8 @@ function LudoCellView({ cell }: { cell: LudoCell }) {
       className={cn(
         "relative overflow-hidden",
         cell.kind === "void" && "bg-void",
-        cell.kind === "path" && "bg-parchment/90",
-        cell.kind === "safe" && "bg-parchment",
+        cell.kind === "path" && "bg-cream/90",
+        cell.kind === "safe" && "bg-cream",
         cell.kind === "center" && "bg-gold",
       )}
       style={cellStyle(cell)}

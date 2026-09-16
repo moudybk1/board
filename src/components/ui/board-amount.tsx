@@ -2,18 +2,18 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn, formatBoard, formatBoardCompact } from "@/lib/utils";
 
-const amount = cva("font-pixel tabular-nums", {
+const amount = cva("font-pixel font-bold tabular-nums", {
   variants: {
     size: {
-      xs: "text-[9px]",
-      sm: "text-[10px]",
-      md: "text-[11px]",
-      lg: "text-sm",
-      xl: "text-xl text-shadow-pixel",
+      xs: "text-xs",
+      sm: "text-sm",
+      md: "text-base",
+      lg: "text-lg",
+      xl: "text-3xl",
     },
     tone: {
       default: "text-parchment",
-      gold: "text-gold",
+      gold: "text-gold-deep",
       muted: "text-muted",
       success: "text-success",
       danger: "text-danger",
@@ -23,11 +23,11 @@ const amount = cva("font-pixel tabular-nums", {
 });
 
 const TICKER_SIZE = {
-  xs: "text-[7px]",
-  sm: "text-[8px]",
-  md: "text-[8px]",
-  lg: "text-[9px]",
-  xl: "text-[10px]",
+  xs: "text-[10px]",
+  sm: "text-xs",
+  md: "text-xs",
+  lg: "text-sm",
+  xl: "text-base",
 } as const;
 
 /**

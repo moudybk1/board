@@ -26,7 +26,7 @@ export function EntryFeeFilter({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="mr-1 font-pixel text-[9px] uppercase text-faint">
+      <span className="mr-1 font-pixel text-xs font-bold uppercase text-faint">
         Entry fee
       </span>
 
@@ -68,10 +68,10 @@ export function EntryFeeFilter({
 
       <label
         className={cn(
-          "pixel-corners ml-1 flex cursor-pointer items-center gap-2 border-2 px-2.5 py-1.5 transition-colors",
+          "rounded-full ml-1 flex cursor-pointer items-center gap-2 border-[3px] px-3 py-1.5 transition-colors",
           affordableOnly
-            ? "border-gold bg-gold/10 text-gold"
-            : "border-edge bg-surface text-muted hover:text-parchment",
+            ? "border-void bg-gold text-void"
+            : "border-void bg-surface text-muted hover:bg-gold hover:text-void",
         )}
       >
         <input
@@ -81,7 +81,7 @@ export function EntryFeeFilter({
           className="size-3 accent-gold"
         />
         <Wallet className="size-3" aria-hidden />
-        <span className="font-pixel text-[8px] uppercase">
+        <span className="font-pixel text-xs font-bold uppercase">
           Within balance
         </span>
       </label>
@@ -106,12 +106,12 @@ function FilterChip({
       aria-pressed={active}
       onClick={onClick}
       className={cn(
-        "pixel-corners flex items-center gap-1.5 border-2 px-2.5 py-1.5 font-pixel text-[9px] uppercase",
+        "rounded-full flex items-center gap-1.5 border-[3px] px-3 py-1.5 font-pixel text-xs font-bold uppercase",
         "transition-[background-color,border-color,transform] duration-100",
-        "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold",
+        "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-deep",
         active
-          ? "border-gold bg-gold/10 text-gold"
-          : "border-edge bg-surface text-muted hover:border-edge-bright hover:text-parchment",
+          ? "border-void bg-gold text-void"
+          : "border-void bg-surface text-muted hover:bg-surface-hover hover:text-parchment",
         // Tiers with nothing open stay clickable but recede visually.
         empty && !active && "opacity-40",
       )}

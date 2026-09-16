@@ -104,18 +104,18 @@ function SignInModal({
         aria-modal="true"
         aria-labelledby="sign-in-title"
         className={cn(
-          "relative z-10 w-full max-w-md border-4 border-edge-bright bg-ink shadow-pixel-lg",
+          "relative z-10 w-full max-w-md rounded-[1.75rem] border-[4px] border-void bg-surface shadow-pixel-lg",
           "max-h-[min(88dvh,40rem)] overflow-y-auto",
         )}
       >
-        <div className="flex items-start justify-between gap-3 border-b-2 border-edge px-4 py-4 sm:px-5">
+        <div className="flex items-start justify-between gap-3 border-b-[3px] border-void px-4 py-4 sm:px-5">
           <div>
-            <p className="font-pixel text-[8px] uppercase tracking-[0.18em] text-gold">
+            <p className="font-pixel text-xs font-bold uppercase tracking-wide text-gold-deep">
               {ROBINHOOD_CHAIN_LABEL}
             </p>
             <h2
               id="sign-in-title"
-              className="mt-2 font-pixel text-[11px] leading-snug text-parchment sm:text-xs"
+              className="mt-2 font-pixel text-xl font-bold leading-snug text-parchment"
             >
               Sign in with wallet
             </h2>

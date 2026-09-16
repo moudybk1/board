@@ -22,7 +22,7 @@ export const ROADMAP: RoadmapItem[] = [
   {
     id: "tables",
     phase: "Now",
-    title: "Pixel tables live",
+    title: "Cartoon tables live",
     body: "Monopoly with country landmarks and Ludo with capture races. Four seats, one winner.",
     status: "live",
   },

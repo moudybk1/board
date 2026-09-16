@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Chunk pixel toggle — replaces native checkboxes in settings.
+ * Chunky cartoon toggle — replaces native checkboxes in settings.
  */
 export function PixelSwitch({
   checked,
@@ -30,11 +30,11 @@ export function PixelSwitch({
       )}
     >
       <span className="min-w-0">
-        <span className="font-pixel text-[10px] uppercase tracking-wide text-parchment">
+        <span className="font-pixel text-sm font-bold uppercase tracking-wide text-parchment">
           {label}
         </span>
         {description ? (
-          <span className="mt-1.5 block text-xs leading-relaxed text-muted">
+          <span className="mt-1.5 block text-sm leading-relaxed text-muted">
             {description}
           </span>
         ) : null}
@@ -43,18 +43,18 @@ export function PixelSwitch({
       <span
         aria-hidden
         className={cn(
-          "relative mt-0.5 inline-flex h-7 w-12 shrink-0 items-center border-2 px-0.5 transition-[background-color,border-color] duration-[var(--duration-fast)]",
+          "relative mt-0.5 inline-flex h-8 w-14 shrink-0 items-center rounded-full border-[3px] px-0.5 transition-[background-color,border-color] duration-[var(--duration-fast)]",
           checked
-            ? "border-gold-deep bg-gold/25"
-            : "border-edge bg-void",
+            ? "border-void bg-gold"
+            : "border-void bg-cream",
         )}
       >
         <span
           className={cn(
-            "size-5 border-2 transition-transform duration-[var(--duration-fast)] ease-[cubic-bezier(0.32,0.72,0,1)]",
+            "size-5 rounded-full border-[3px] border-void transition-transform duration-[var(--duration-fast)] ease-[cubic-bezier(0.34,1.56,0.64,1)]",
             checked
-              ? "translate-x-5 border-gold-deep bg-gold shadow-[2px_0_0_0_var(--color-gold-deep)]"
-              : "translate-x-0 border-edge-bright bg-muted",
+              ? "translate-x-6 bg-gold-deep"
+              : "translate-x-0 bg-muted",
           )}
         />
       </span>

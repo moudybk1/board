@@ -24,7 +24,7 @@ export function SeatDots({
         <span
           key={index}
           className={cn(
-            "size-3 border-2",
+            "size-3 rounded-full border-[2px]",
             index < filled
               ? cn(
                   "border-void/40",

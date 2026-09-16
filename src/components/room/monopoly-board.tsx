@@ -209,7 +209,7 @@ function Tile({
           </span>
 
           {tile.price !== undefined && (
-            <span className="font-pixel text-[clamp(3px,0.5vh,5px)] leading-tight text-gold">
+            <span className="font-pixel text-[clamp(3px,0.5vh,5px)] leading-tight text-gold-deep">
               {tile.price}
             </span>
           )}
@@ -223,7 +223,7 @@ function BoardCenter({ children }: { children?: React.ReactNode }) {
   return (
     <div
       style={{ gridArea: `2 / 2 / ${BOARD_SIZE} / ${BOARD_SIZE}` }}
-      className="relative flex items-center justify-center overflow-hidden bg-void"
+      className="relative flex items-center justify-center overflow-hidden bg-felt"
     >
       <div
         aria-hidden
@@ -235,10 +235,10 @@ function BoardCenter({ children }: { children?: React.ReactNode }) {
       />
 
       <div className="relative flex flex-col items-center gap-2 px-2">
-        <span className="font-pixel text-[clamp(8px,2vh,20px)] text-gold text-shadow-pixel">
+        <span className="font-pixel text-[clamp(14px,2.4vh,28px)] font-bold text-cream">
           BOARD
         </span>
-        <span className="font-pixel text-[clamp(4px,0.8vh,8px)] uppercase tracking-widest text-faint">
+        <span className="font-pixel text-[clamp(8px,1vh,12px)] font-bold uppercase tracking-wide text-cream/80">
           World Tour
         </span>
 
@@ -249,7 +249,7 @@ function BoardCenter({ children }: { children?: React.ReactNode }) {
             return (
               <div
                 key={tile.index}
-                className="pixel-corners border border-edge bg-surface/80 p-0.5"
+                className="rounded-md border-[2px] border-void bg-cream p-0.5"
                 title={`${tile.name} · ${landmarkLabel(tile.landmark)}`}
               >
                 <PixelArt

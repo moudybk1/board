@@ -7,7 +7,7 @@ import type { GameOption } from "@/lib/mock/lobby";
 import { cn, formatBoard } from "@/lib/utils";
 
 /**
- * Arcade cabinet picker card — selecting swaps the room list in place.
+ * Toy cabinet picker card — selecting swaps the room list in place.
  */
 export function GameCard({
   game,
@@ -36,23 +36,23 @@ export function GameCard({
       onClick={onSelect}
       onKeyDown={onKeyDown}
       className={cn(
-        "group relative flex min-h-[12.5rem] flex-col overflow-hidden border-2 p-0 text-left",
-        "transition-[transform,box-shadow,border-color,opacity] duration-[var(--duration-fast)] ease-[cubic-bezier(0.32,0.72,0,1)]",
-        "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold",
+        "group relative flex min-h-[12.5rem] flex-col overflow-hidden rounded-[1.5rem] border-[4px] p-0 text-left",
+        "transition-[transform,box-shadow,border-color,background-color] duration-[var(--duration-fast)] ease-[cubic-bezier(0.34,1.56,0.64,1)]",
+        "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-deep",
         selected
-          ? "-translate-y-1 border-gold shadow-pixel-lg"
-          : "border-edge opacity-80 shadow-pixel hover:-translate-y-0.5 hover:opacity-100",
-        selected && isMonopoly && "bg-monopoly/10",
-        selected && !isMonopoly && "bg-ludo/10",
+          ? "-translate-y-1 border-void shadow-pixel-lg"
+          : "border-void opacity-90 shadow-pixel hover:-translate-y-1 hover:opacity-100",
+        selected && isMonopoly && "bg-monopoly/20",
+        selected && !isMonopoly && "bg-ludo/20",
         !selected && "bg-surface",
       )}
     >
       <div
         aria-hidden
         className={cn(
-          "h-1.5 w-full",
+          "h-2.5 w-full",
           isMonopoly ? "bg-monopoly" : "bg-ludo",
-          !selected && "opacity-40",
+          !selected && "opacity-55",
         )}
       />
 
@@ -61,11 +61,11 @@ export function GameCard({
           <span
             aria-hidden
             className={cn(
-              "grid size-14 shrink-0 place-items-center border-2 text-2xl sm:size-16 sm:text-3xl",
+              "grid size-14 shrink-0 place-items-center rounded-[1.1rem] border-[3px] border-void text-2xl sm:size-16 sm:text-3xl",
               selected && "animate-float",
               isMonopoly
-                ? "border-monopoly/55 bg-void text-monopoly"
-                : "border-ludo/55 bg-void text-ludo",
+                ? "bg-monopoly/20 text-monopoly"
+                : "bg-ludo/20 text-ludo",
             )}
           >
             {game.glyph}
@@ -75,7 +75,7 @@ export function GameCard({
             <div className="flex items-start justify-between gap-2">
               <h3
                 className={cn(
-                  "font-pixel text-pixel-fluid-md text-shadow-pixel",
+                  "font-pixel text-pixel-fluid-md font-bold",
                   isMonopoly ? "text-monopoly" : "text-ludo",
                 )}
               >
@@ -88,7 +88,7 @@ export function GameCard({
                 </PixelBadge>
               ) : null}
             </div>
-            <p className="mt-2 text-xs leading-relaxed text-muted">
+            <p className="mt-2 text-sm leading-relaxed text-muted">
               {game.tagline}
             </p>
           </div>
@@ -98,22 +98,22 @@ export function GameCard({
           {game.description}
         </p>
 
-        <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-2 border-t-2 border-edge pt-4 text-[10px] uppercase tracking-wide text-faint">
+        <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-2 border-t-[3px] border-void/15 pt-4 text-xs font-bold uppercase tracking-wide text-faint">
           <span className="flex items-center gap-1.5">
-            <Users className="size-3" aria-hidden />
+            <Users className="size-3.5" aria-hidden />
             {formatBoard(game.activePlayers)} playing
           </span>
           <span className="flex items-center gap-1.5">
-            <Radio className="size-3 text-success" aria-hidden />
+            <Radio className="size-3.5 text-success" aria-hidden />
             {game.openRooms} open
           </span>
           <span
             className={cn(
-              "ml-auto font-pixel text-[9px] uppercase transition-colors",
-              selected ? "text-gold" : "text-faint group-hover:text-parchment",
+              "ml-auto font-pixel text-xs uppercase transition-colors",
+              selected ? "text-gold-deep" : "text-faint group-hover:text-parchment",
             )}
           >
-            {selected ? "Tables below ↓" : "Select →"}
+            {selected ? "Tables below" : "Select"}
           </span>
         </div>
       </div>

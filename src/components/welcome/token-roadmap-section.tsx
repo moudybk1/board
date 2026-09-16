@@ -5,31 +5,31 @@ export function TokenRoadmapSection({ className }: { className?: string }) {
   return (
     <section
       aria-labelledby="token-roadmap-title"
-      className={cn("border-t border-edge py-12 sm:py-16", className)}
+      className={cn("border-t-[3px] border-void bg-cream/40 py-12 sm:py-16", className)}
     >
       <div className="board-container grid gap-12 lg:grid-cols-2 lg:gap-20">
         <div>
           <h2
             id="token-roadmap-title"
-            className="text-sm leading-snug text-parchment sm:text-base"
+            className="font-pixel text-2xl font-bold leading-snug text-parchment sm:text-3xl"
           >
             {TOKEN_INFO.symbol} on {TOKEN_INFO.chain}
           </h2>
-          <p className="mt-4 max-w-[55ch] text-[9px] leading-relaxed text-muted sm:text-[10px]">
+          <p className="mt-4 max-w-[55ch] text-base leading-relaxed text-muted">
             {TOKEN_INFO.role}
           </p>
-          <p className="mt-3 max-w-[55ch] text-[9px] leading-relaxed text-muted sm:text-[10px]">
+          <p className="mt-3 max-w-[55ch] text-base leading-relaxed text-muted">
             {TOKEN_INFO.feeNote}
           </p>
 
-          <dl className="mt-8 flex flex-wrap gap-x-10 gap-y-4 text-[9px] uppercase tracking-wider">
+          <dl className="mt-8 flex flex-wrap gap-x-10 gap-y-4 text-sm font-bold uppercase tracking-wide">
             <div>
               <dt className="text-faint">Symbol</dt>
-              <dd className="mt-1 text-[10px] text-gold">{TOKEN_INFO.symbol}</dd>
+              <dd className="mt-1 text-lg text-gold-deep">{TOKEN_INFO.symbol}</dd>
             </div>
             <div>
               <dt className="text-faint">Network</dt>
-              <dd className="mt-1 text-[10px] text-parchment">{TOKEN_INFO.chain}</dd>
+              <dd className="mt-1 text-lg text-parchment">{TOKEN_INFO.chain}</dd>
             </div>
           </dl>
         </div>
@@ -61,22 +61,22 @@ function RoadmapRow({
     item.status === "live"
       ? "text-success"
       : item.status === "next"
-        ? "text-gold"
+        ? "text-gold-deep"
         : "text-faint";
 
   return (
     <li
       className={cn(
-        "grid grid-cols-[5rem_1fr] gap-4 border-b border-edge py-5 sm:grid-cols-[6rem_1fr]",
+        "grid grid-cols-[5rem_1fr] gap-4 border-b-[3px] border-void/15 py-5 sm:grid-cols-[6rem_1fr]",
         isLast && "border-b-0",
       )}
     >
-      <span className={cn("text-[9px] uppercase", statusClass)}>
+      <span className={cn("text-sm font-bold uppercase", statusClass)}>
         {statusLabel}
       </span>
       <div>
-        <h3 className="text-[10px] text-parchment sm:text-xs">{item.title}</h3>
-        <p className="mt-1.5 text-[8px] leading-relaxed text-muted sm:text-[9px]">
+        <h3 className="text-base font-bold text-parchment sm:text-lg">{item.title}</h3>
+        <p className="mt-1.5 text-sm leading-relaxed text-muted">
           {item.body}
         </p>
       </div>

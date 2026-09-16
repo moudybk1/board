@@ -60,17 +60,17 @@ export function WelcomeHighlights({ className }: { className?: string }) {
     <section
       ref={root}
       aria-labelledby="welcome-modes"
-      className={cn("border-t border-edge bg-void/40 py-16 sm:py-24", className)}
+      className={cn("border-t-[3px] border-void bg-cream/55 py-16 sm:py-24", className)}
     >
       <div className="board-container">
         <div className="mb-12 flex flex-col gap-4 sm:mb-16 sm:flex-row sm:items-end sm:justify-between">
           <h2
             id="welcome-modes"
-            className="max-w-[18ch] text-sm leading-snug text-parchment sm:text-base"
+            className="max-w-[18ch] font-pixel text-2xl font-bold leading-snug text-parchment sm:text-3xl"
           >
             Two tables. Same pot fight.
           </h2>
-          <p className="max-w-[40ch] text-[9px] leading-relaxed text-muted sm:text-[10px]">
+          <p className="max-w-[40ch] text-base leading-relaxed text-muted">
             Four seats, one survivor. Watch the boards breathe, then take a
             chair in the lobby.
           </p>
@@ -87,7 +87,7 @@ export function WelcomeHighlights({ className }: { className?: string }) {
               )}
             >
               <div className="relative mx-auto w-full max-w-sm lg:max-w-md">
-                <div className="relative overflow-hidden border-2 border-edge-bright bg-void/50 p-4 shadow-pixel-lg sm:p-5">
+                <div className="relative overflow-hidden rounded-[1.75rem] border-[4px] border-void bg-cream p-4 shadow-pixel-lg sm:p-5">
                   <div
                     aria-hidden
                     className={cn(
@@ -102,13 +102,13 @@ export function WelcomeHighlights({ className }: { className?: string }) {
               <div className="max-w-md">
                 <h3
                   className={cn(
-                    "font-pixel text-xs sm:text-sm",
+                    "font-pixel text-2xl font-bold sm:text-3xl",
                     mode.id === "monopoly" ? "text-monopoly" : "text-ludo",
                   )}
                 >
                   {mode.title}
                 </h3>
-                <p className="mt-4 text-[9px] leading-relaxed text-muted sm:text-[10px]">
+                <p className="mt-4 text-base leading-relaxed text-muted">
                   {mode.body}
                 </p>
                 <PixelButtonLink
@@ -124,20 +124,20 @@ export function WelcomeHighlights({ className }: { className?: string }) {
           ))}
         </div>
 
-        <ul className="mt-20 grid gap-6 border-t border-edge pt-10 sm:grid-cols-3">
+        <ul className="mt-20 grid gap-6 border-t-[3px] border-void pt-10 sm:grid-cols-3">
           {WELCOME_HIGHLIGHTS.map((item) => (
             <li key={item.id}>
-              <h3 className="text-[10px] uppercase tracking-wider text-gold">
+              <h3 className="font-pixel text-base font-bold uppercase tracking-wide text-gold-deep">
                 {item.title}
               </h3>
-              <p className="mt-2 text-[9px] leading-relaxed text-muted">
+              <p className="mt-2 text-sm leading-relaxed text-muted">
                 {item.body}
               </p>
             </li>
           ))}
         </ul>
 
-        <p className="mt-10 text-center text-[9px] text-faint">
+        <p className="mt-10 text-center text-sm text-faint">
           New here?{" "}
           <Link href="/how-to" className="text-gold underline-offset-4 hover:underline">
             How to play
